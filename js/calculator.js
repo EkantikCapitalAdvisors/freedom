@@ -851,7 +851,7 @@ function displayComparisonTable(comparisons) {
                     MassMutual Whole Life 12-Pay | Standard Plus Non-Tobacco (SPNT) | Age 52, $50K/year for 12 years<br>
                     Actual Values: Y10=$582K CV/$1.533M DB, Y20=$1.133M/$2.062M, Y30=$1.890M/$2.707M, Y40=$2.966M/$3.615M<br>
                     <em>When you change inputs (age, amount, etc.), projections scale proportionally to approximate Standard Plus Non-Tobacco results.</em>
-                    <a href="documents/MassMutual-Illustration.pdf" target="_blank" style="color: #d4af37; text-decoration: underline; margin-left: 10px;">📄 View Full Illustration (PDF)</a>
+                    <a href="https://github.com/user-attachments/files/24987347/massmutual-illustration.pdf" target="_blank" style="color: #d4af37; text-decoration: underline; margin-left: 10px;">📄 View Full Illustration (PDF)</a>
                 </p>
             </div>
             
