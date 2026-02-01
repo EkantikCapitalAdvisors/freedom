@@ -1,0 +1,107 @@
+/* ===================================
+   FOUNDING MEMBER URGENCY ELEMENTS
+   Quick Wins CSS
+   =================================== */
+
+/* Founding Urgency Box (Contact Section) */
+.founding-urgency-box {
+    background: linear-gradient(135deg, 
+        rgba(212, 175, 55, 0.12) 0%, 
+        rgba(212, 175, 55, 0.04) 100%);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    padding: 32px;
+    margin: 30px 0;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.urgency-icon {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--pale-gold) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--midnight);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+}
+
+.urgency-content h4 {
+    font-size: 22px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.urgency-content p {
+    font-size: 16px;
+    color: var(--cream);
+    line-height: 1.7;
+    margin-bottom: 16px;
+}
+
+.urgency-content strong {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.urgency-benefits {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.urgency-benefits li {
+    font-size: 15px;
+    color: var(--cream);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.urgency-benefits i {
+    color: var(--gold);
+    font-size: 16px;
+}
+
+.urgency-warning {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(212, 175, 55, 0.3);
+    font-size: 15px;
+}
+
+.highlight-cost {
+    color: #f87171;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .founding-urgency-box {
+        flex-direction: column;
+        padding: 24px;
+        text-align: center;
+    }
+
+    .urgency-icon {
+        margin: 0 auto;
+    }
+
+    .urgency-content h4 {
+        font-size: 19px;
+    }
+
+    .urgency-benefits {
+        align-items: flex-start;
+    }
+}

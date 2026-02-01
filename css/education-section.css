@@ -1,0 +1,463 @@
+/* ===================================
+   FOUNDING MEMBER EDUCATION SECTION
+   Ekantik Capital Advisors
+   =================================== */
+
+/* Section Container */
+.education-section {
+    padding: 100px 0;
+    background: linear-gradient(180deg, 
+        var(--deep-navy) 0%, 
+        var(--midnight) 50%,
+        var(--deep-navy) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.education-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--gold) 50%, 
+        transparent 100%);
+    opacity: 0.3;
+}
+
+/* Exclusive Badge */
+.badge-exclusive {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--pale-gold) 100%);
+    color: var(--midnight);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 8px 20px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+/* Section Header */
+.education-section .section-title {
+    font-size: 42px;
+    color: var(--cream);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.education-section .section-subtitle {
+    font-size: 18px;
+    color: var(--silver);
+    max-width: 800px;
+    margin: 0 auto 60px;
+    line-height: 1.7;
+}
+
+/* Problem/Solution Intro */
+.education-intro {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 80px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.intro-problem,
+.intro-solution {
+    text-align: center;
+}
+
+.intro-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+}
+
+.problem-icon {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+.solution-icon {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
+    border: 2px solid var(--gold);
+    color: var(--gold);
+}
+
+.intro-problem h3,
+.intro-solution h3 {
+    font-size: 22px;
+    color: var(--cream);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.intro-problem p,
+.intro-solution p {
+    font-size: 15px;
+    color: var(--silver);
+    line-height: 1.7;
+}
+
+.intro-solution strong {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.intro-solution em {
+    color: var(--pale-gold);
+    font-style: italic;
+}
+
+.intro-arrow {
+    font-size: 32px;
+    color: var(--gold);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Education Pillars */
+.education-pillars {
+    margin-bottom: 80px;
+}
+
+.pillars-title {
+    text-align: center;
+    font-size: 28px;
+    color: var(--cream);
+    margin-bottom: 50px;
+    font-weight: 600;
+}
+
+.pillars-title i {
+    color: var(--gold);
+    margin-right: 12px;
+}
+
+.pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.pillar-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 12px;
+    padding: 32px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.pillar-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--pale-gold) 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.pillar-card:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--gold);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15);
+}
+
+.pillar-card:hover::before {
+    transform: scaleX(1);
+}
+
+.pillar-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.pillar-icon i {
+    font-size: 28px;
+    color: var(--gold);
+}
+
+.pillar-card h4 {
+    font-size: 20px;
+    color: var(--cream);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.pillar-card p {
+    font-size: 14px;
+    color: var(--silver);
+    line-height: 1.7;
+    margin-bottom: 16px;
+}
+
+.pillar-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--gold);
+    background: rgba(212, 175, 55, 0.1);
+    padding: 6px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+/* Operationalization How */
+.operationalization-how {
+    margin-bottom: 60px;
+}
+
+.how-title {
+    text-align: center;
+    font-size: 28px;
+    color: var(--cream);
+    margin-bottom: 40px;
+    font-weight: 600;
+}
+
+.how-title i {
+    color: var(--gold);
+    margin-right: 12px;
+}
+
+.how-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.how-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.how-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--gold);
+    transform: translateX(5px);
+}
+
+.how-number {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--pale-gold) 100%);
+    color: var(--midnight);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.how-content h4 {
+    font-size: 17px;
+    color: var(--cream);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.how-content h4 i {
+    color: var(--gold);
+    margin-right: 8px;
+    font-size: 15px;
+}
+
+.how-content p {
+    font-size: 14px;
+    color: var(--silver);
+    line-height: 1.6;
+}
+
+/* Community Value Box */
+.community-value {
+    margin-bottom: 60px;
+}
+
+.value-box {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    padding: 40px;
+    background: linear-gradient(135deg, 
+        rgba(212, 175, 55, 0.08) 0%, 
+        rgba(212, 175, 55, 0.02) 100%);
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(212, 175, 55, 0.15);
+}
+
+.value-icon {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--pale-gold) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: var(--midnight);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+}
+
+.value-content h3 {
+    font-size: 24px;
+    color: var(--cream);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.value-content p {
+    font-size: 16px;
+    color: var(--silver);
+    line-height: 1.7;
+    margin-bottom: 10px;
+}
+
+.value-content strong {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.value-content em {
+    color: var(--pale-gold);
+    font-style: italic;
+}
+
+.value-highlight {
+    font-size: 17px;
+    color: var(--cream);
+    font-weight: 500;
+    margin-top: 16px;
+}
+
+/* Education CTA */
+.education-cta {
+    text-align: center;
+    padding-top: 40px;
+}
+
+.btn-large {
+    font-size: 17px;
+    padding: 18px 40px;
+}
+
+.cta-note {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--silver);
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+    .education-section {
+        padding: 80px 0;
+    }
+
+    .education-section .section-title {
+        font-size: 34px;
+    }
+
+    .education-intro {
+        grid-template-columns: 1fr;
+        gap: 30px;
+        padding: 30px;
+    }
+
+    .intro-arrow {
+        transform: rotate(90deg);
+        font-size: 28px;
+    }
+
+    .pillars-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .how-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .value-box {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px;
+    }
+}
+
+@media (max-width: 640px) {
+    .education-section .section-title {
+        font-size: 28px;
+    }
+
+    .education-section .section-subtitle {
+        font-size: 16px;
+    }
+
+    .pillars-title,
+    .how-title {
+        font-size: 24px;
+    }
+
+    .intro-problem h3,
+    .intro-solution h3 {
+        font-size: 19px;
+    }
+
+    .pillar-card,
+    .how-item {
+        padding: 24px;
+    }
+
+    .value-content h3 {
+        font-size: 20px;
+    }
+
+    .btn-large {
+        font-size: 15px;
+        padding: 16px 32px;
+    }
+}

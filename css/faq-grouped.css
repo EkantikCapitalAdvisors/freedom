@@ -1,0 +1,102 @@
+/* Grouped FAQ Styles */
+
+.faq-grouped-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* Category Headers */
+.faq-category {
+    margin-bottom: 40px;
+}
+
+.faq-category-header {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%);
+    border-left: 5px solid var(--gold);
+    padding: 20px 30px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.faq-category-header:hover {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.08) 100%);
+    transform: translateX(5px);
+}
+
+.faq-category-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.faq-category-icon {
+    font-size: 1.5rem;
+    color: var(--gold);
+    min-width: 30px;
+}
+
+.faq-category-text h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    color: var(--gold);
+    margin: 0 0 5px 0;
+    font-weight: 600;
+}
+
+.faq-category-text p {
+    font-size: 0.95rem;
+    color: var(--text-gray);
+    margin: 0;
+}
+
+.faq-category-toggle {
+    font-size: 1.2rem;
+    color: var(--gold);
+    transition: transform 0.3s ease;
+}
+
+.faq-category.active .faq-category-toggle {
+    transform: rotate(180deg);
+}
+
+/* FAQ Items within categories */
+.faq-category-items {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+    padding-left: 20px;
+}
+
+.faq-category.active .faq-category-items {
+    max-height: 10000px;
+}
+
+.faq-category-items .faq-item {
+    margin-bottom: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .faq-category-header {
+        padding: 15px 20px;
+    }
+    
+    .faq-category-text h3 {
+        font-size: 1.4rem;
+    }
+    
+    .faq-category-icon {
+        font-size: 1.2rem;
+    }
+    
+    .faq-category-items {
+        padding-left: 10px;
+    }
+}
