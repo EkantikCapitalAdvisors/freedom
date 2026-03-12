@@ -214,7 +214,7 @@ const pageLoader = {
                 this.element.classList.add('hidden');
                 document.body.style.overflow = 'visible';
             }
-        }, 1500);
+        }, 300);
     }
 };
 
@@ -374,70 +374,9 @@ window.addEventListener('resize', () => {
 });
 
 // ===================================
-// CONTACT FORM
+// CONTACT SECTION
 // ===================================
-
-const contactForm = document.getElementById('contactForm');
-const successModal = document.getElementById('successModal');
-
-if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = {
-            fullName: document.getElementById('fullName').value,
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value,
-            assets: document.getElementById('assets').value,
-            message: document.getElementById('message').value,
-            timestamp: new Date().toISOString()
-        };
-        
-        const submitBtn = contactForm.querySelector('.form-submit');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span>Submitting...</span>';
-        submitBtn.disabled = true;
-        
-        try {
-            // Simulate API call (replace with actual endpoint)
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            console.log('Form submitted:', formData);
-            
-            // Show success modal
-            successModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Reset form
-            contactForm.reset();
-            
-        } catch (error) {
-            console.error('Form submission error:', error);
-            alert('There was an error submitting your application. Please try again.');
-        } finally {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }
-    });
-}
-
-// Close modal function
-window.closeModal = function() {
-    successModal.classList.remove('active');
-    document.body.style.overflow = '';
-};
-
-// Close modal on overlay click
-if (successModal) {
-    successModal.querySelector('.modal-overlay').addEventListener('click', closeModal);
-}
-
-// Close modal on ESC key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && successModal.classList.contains('active')) {
-        closeModal();
-    }
-});
+// Contact form replaced with Calendly inline embed — no form handling needed.
 
 // ===================================
 // EXPENSE PYRAMID LIGHTBOX
