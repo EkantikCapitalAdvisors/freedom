@@ -4,11 +4,12 @@
 
 ## 🎯 Overview
 
-This is the official landing page for the Ekantik Capital Advisors (ECA) Founding Member Program - a comprehensive wealth execution system combining:
+This is the official landing page for the Ekantik Capital Advisors (ECA) Founding Member Program. The page focuses on **EPIG 500** and the surrounding Financial Freedom Operating System:
 
-- **ECFS (Ekantik Cash Flow Strategy)**: Quarterly cash flow distributions targeting 6% per quarter
-- **EPIG 500**: Long-term capital appreciation and compounding
+- **EPIG 500**: Long-term capital appreciation and compounding with drawdown defense — a rules-based S&P 500 strategy. The page carries a brief intro; the full strategy detail lives on the dedicated site at https://epig500.ekantikcapital.com/
 - **Financial Freedom Operating System**: Complete frameworks, education, and community
+
+> **Note:** ECFS (Ekantik Cash Flow Strategy) content was removed from this page so it focuses solely on EPIG 500. ECFS has its own dedicated landing page elsewhere.
 
 **Limited to 25 Founding Member seats** with lifetime benefits and locked rates.
 
@@ -22,19 +23,18 @@ This is the official landing page for the Ekantik Capital Advisors (ECA) Foundin
 2. **Social Proof** - Limited seats, fee locked, program launch status
 3. **Freedom Setup** - Ideal financial freedom configuration
 4. **Financial Freedom Framework** - LAA → NEV → CED → ENW operating system
-5. **Floor + Surge Wealth Reservoir** - Dual-strategy approach
-6. **ECFS Section** - Quarterly cash flow strategy (NEW: Quarterly model)
-7. **EPIG 500 Section** - Long-term compounding strategy
-8. **Philosophy** - Paradigm shifts and probability matrix
-9. **Abundance Stack** - Comprehensive wealth building layers
-10. **Calculator** - Interactive wealth target calculator with Chart.js
-11. **Education** - Frameworks, tools, and learning resources
-12. **Membership Comparison** - Founding vs. regular membership benefits
-13. **Ideal Profile** - Target client characteristics
-14. **ECA Scope** - What's included and excluded
-15. **Grouped FAQ** - Four categories with collapsible accordion (NEW)
-16. **Decision Point** - Pre-qualification survey and path selection
-17. **Contact CTA** - Calendly booking integration
+5. **Floor + Surge Wealth Reservoir** - Wealth reservoir approach
+6. **EPIG 500 Section** - Long-term compounding strategy (brief intro + link to the dedicated EPIG 500 site)
+7. **Philosophy** - Paradigm shifts and probability matrix
+8. **Abundance Stack** - Comprehensive wealth building layers
+9. **Calculator** - Interactive wealth target calculator with Chart.js
+10. **Education** - Frameworks, tools, and learning resources
+11. **Membership Comparison** - Founding vs. regular membership benefits
+12. **Ideal Profile** - Target client characteristics
+13. **ECA Scope** - What's included and excluded
+14. **Grouped FAQ** - Four categories with collapsible accordion
+15. **Decision Point** - Pre-qualification survey and path selection
+16. **Contact CTA** - Calendly booking integration
 
 ### 🎨 Design Features
 
@@ -44,6 +44,16 @@ This is the official landing page for the Ekantik Capital Advisors (ECA) Foundin
 - **Animations**: GSAP ScrollTrigger for smooth scroll animations
 - **Icons**: Font Awesome 6.4.0
 - **Charts**: Chart.js for interactive data visualization
+
+### 🆕 Recent Updates (June 26, 2026)
+
+#### EPIG 500 Refocus
+- **Removed**: All ECFS (cash flow) content — section, nav/footer/mobile links, hero metric, ECFS "À La Carte" card, and the ECFS row in the passive-income comparison table
+- **Slimmed**: The EPIG 500 section now shows a brief intro (header + benefit cards) and links out to the dedicated site for the deep strategy/backtest detail
+- **NEW CTA**: "Learn More About EPIG 500" → https://epig500.ekantikcapital.com/
+- **Fixed**: EPIG "À La Carte" card and EPIG CTAs now point to https://epig500.ekantikcapital.com/ (previously pointed to founding.ekantikcapital.com)
+- **Reframed**: Hero, meta tags, scope, FAQ, membership, and calculator copy around EPIG 500 only
+- **Removed**: The now-unused EPIG-vs-S&P comparison lightbox modal
 
 ### 🆕 Recent Updates (January 30, 2025)
 
@@ -56,13 +66,6 @@ This is the official landing page for the Ekantik Capital Advisors (ECA) Foundin
 - Collapsible category headers with gold accents
 - Smooth accordion animations
 - Mobile-optimized interactions
-
-#### ECFS Quarterly Distribution Model
-- **Updated**: Changed from monthly to quarterly distributions
-- **Target**: 6% quarterly distribution (equivalent to 2% monthly)
-- **Performance**: ~10% gross quarterly return target
-- **NEW Visual**: Distribution Flow Model diagram
-- **Protocol**: Losing quarters pause distributions to rebuild buffer
 
 #### Copy Corrections
 - ✅ Updated social proof: "Limited to 25 Seats" (previously "17 of 25 Spots Left")
@@ -111,8 +114,7 @@ ekantik-capital-landing/
 ## 🔗 External Links & Integrations
 
 ### Landing Pages
-- **EPIG 500 À La Carte**: https://EPIG500.ekantikcapital.com/
-- **ECFS À La Carte**: https://cashflow.ekantikcapital.com/
+- **EPIG 500 À La Carte** (dedicated strategy site): https://epig500.ekantikcapital.com/
 
 ### Booking
 - **Founding Member Consultation**: https://calendly.com/hd-ekantikcapital/30min
@@ -179,8 +181,7 @@ The landing page showcases the Financial Freedom KPIs:
 - [x] Interactive wealth calculator with Chart.js
 - [x] Smooth scroll animations with GSAP
 - [x] Grouped FAQ system with 4 categories
-- [x] ECFS quarterly distribution model
-- [x] External links to EPIG 500 and ECFS landing pages
+- [x] EPIG 500 section links out to the dedicated EPIG 500 site
 - [x] Calendly integration for consultation booking
 - [x] Pre-qualification survey with 10 questions
 - [x] Membership comparison table
@@ -262,9 +263,8 @@ After deployment, verify:
 - [ ] FAQ categories collapse/expand on click
 - [ ] FAQ questions expand/collapse properly
 - [ ] Only one FAQ answer open per category at a time
-- [ ] ECFS section displays "Quarterly" distribution model
-- [ ] Distribution Flow Model renders correctly
-- [ ] External links open in new tabs (EPIG 500, ECFS, Calendly)
+- [ ] EPIG 500 "Learn More" button links to the dedicated EPIG 500 site
+- [ ] External links open in new tabs (EPIG 500, Calendly)
 - [ ] Social proof shows "Limited to 25 Seats"
 - [ ] No "SEC Registered" claim visible
 - [ ] Calculator functions and renders charts
@@ -291,7 +291,6 @@ After deployment, verify:
 - **Secondary CTAs**: 
   - Take Pre-Qualification Survey
   - Learn more about EPIG 500 (external)
-  - Learn more about ECFS (external)
 - **Micro-conversions**: 
   - Calculator interaction
   - FAQ engagement
@@ -347,8 +346,7 @@ After deployment, verify:
 ## 📞 Contact & Support
 
 - **Consultation Booking**: https://calendly.com/hd-ekantikcapital/30min
-- **EPIG 500 Information**: https://EPIG500.ekantikcapital.com/
-- **ECFS Information**: https://cashflow.ekantikcapital.com/
+- **EPIG 500 Information**: https://epig500.ekantikcapital.com/
 
 ---
 
@@ -361,8 +359,8 @@ Proprietary - All rights reserved by Ekantik Capital Advisors
 ## 🏆 Credits
 
 **Design & Development**: Ekantik Capital Advisors Team  
-**Last Updated**: January 30, 2025, 03:15 AM  
-**Version**: 2.1.0 (Grouped FAQ + ECFS Quarterly Model)
+**Last Updated**: June 26, 2026  
+**Version**: 3.0.0 (EPIG 500 Refocus)
 
 ---
 
