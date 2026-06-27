@@ -66,6 +66,30 @@ function setupInputListeners() {
     numberInputs.forEach(input => {
         input.addEventListener('blur', validateInputs);
     });
+
+    // Live recalculation: once results are visible, recompute as the user
+    // changes any assumption (growth rates, contributions, etc.) instead of
+    // requiring another "Calculate" click. Debounced so slider/typing is smooth.
+    const recalcIds = [
+        'currentAge', 'timeHorizon', 'annualContribution', 'contributionTiming',
+        'directCAGR', 'perpetualRate', 'taxRate', 'customTaxRate',
+        'cvGrowthRate', 'borrowPercent', 'loanRate', 'deathBenefit'
+    ];
+    let recalcTimer = null;
+    const liveRecalc = () => {
+        const results = document.getElementById('resultsContainer');
+        // Wait for the first explicit "Calculate" before auto-updating.
+        if (!results || results.style.display === 'none') return;
+        clearTimeout(recalcTimer);
+        recalcTimer = setTimeout(calculate, 250);
+    };
+    recalcIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', liveRecalc);
+            el.addEventListener('change', liveRecalc);
+        }
+    });
 }
 
 // ===================================
