@@ -737,7 +737,7 @@ function generateComparisonTable(plan1, plan2, inputs) {
     // Growth rates
     const plan1BondRate = 5; // 5% bonds (taxable annually)
     
-    // Plan 2: Based on REAL MassMutual illustration (Standard Plus Non-Tobacco)
+    // Plan 2: Based on REAL MassMutual illustration (Select Preferred Non-Tobacco, non-guaranteed/current dividend scale)
     // Source: MassMutual WL 12-Pay, Age 52, $50K/year for 12 years
     // Actual values: Y10=$582K CV/$1.533M DB, Y20=$1.133M/$2.062M, Y30=$1.890M/$2.707M, Y40=$2.966M/$3.615M
     // Growth rates calculated from actual illustration data:
@@ -848,10 +848,11 @@ function displayComparisonTable(comparisons) {
             <div style="padding: 15px; background: #fff8e1; border-left: 4px solid #d4af37; border-radius: 4px; margin-bottom: 20px;">
                 <p style="margin: 0; font-size: 14px; color: #333; line-height: 1.6;">
                     <i class="fas fa-info-circle" style="color: #d4af37;"></i> <strong>Default Example Based on Real MassMutual Illustration:</strong><br>
-                    MassMutual Whole Life 12-Pay | Standard Plus Non-Tobacco (SPNT) | Age 52, $50K/year for 12 years<br>
+                    MassMutual Whole Life 12-Pay | Select Preferred Non-Tobacco | Age 52, $50K/year for 12 years<br>
                     Actual Values: Y10=$582K CV/$1.533M DB, Y20=$1.133M/$2.062M, Y30=$1.890M/$2.707M, Y40=$2.966M/$3.615M<br>
-                    <em>When you change inputs (age, amount, etc.), projections scale proportionally to approximate Standard Plus Non-Tobacco results.</em>
-                    <a href="https://github.com/user-attachments/files/24987347/massmutual-illustration.pdf" target="_blank" style="color: #d4af37; text-decoration: underline; margin-left: 10px;">📄 View Full Illustration (PDF)</a>
+                    <em>When you change inputs (age, amount, etc.), projections scale proportionally to approximate Select Preferred Non-Tobacco results.</em><br>
+                    <strong style="color: #b8860b;">Non-guaranteed:</strong> These figures reflect MassMutual's current dividend scale, which is not guaranteed and can change. Actual results will differ; guaranteed values are lower.
+                    <a href="documents/massmutual-illustration.pdf" target="_blank" rel="noopener" style="color: #d4af37; text-decoration: underline; margin-left: 10px;">📄 View Full Illustration (PDF)</a>
                 </p>
             </div>
             
@@ -865,7 +866,7 @@ function displayComparisonTable(comparisons) {
                     • Legacy shown as $0 (liquidity fund already counted above)
                 </div>
                 <div class="note-item plan2-note">
-                    <strong>Plan 2 Growth Assumptions (Real MassMutual Data):</strong><br>
+                    <strong>Plan 2 Growth Assumptions (Real MassMutual Data — Non-Guaranteed):</strong><br>
                     • Perpetual income continues unchanged<br>
                     • <strong>While Alive:</strong> Liquidity = Cash Value only (Net EPIG annuitized for income)<br>
                     • Cash value grows tax-free: 6.88% (years 10-20), 5.24% (20-30), 4.61% (30-40)<br>
