@@ -741,9 +741,13 @@ function generateComparisonTable(plan1, plan2, inputs) {
     // Source: MassMutual WL 12-Pay, Age 52, $50K/year for 12 years
     // Actual values: Y10=$582K CV/$1.533M DB, Y20=$1.133M/$2.062M, Y30=$1.890M/$2.707M, Y40=$2.966M/$3.615M
     // Growth rates calculated from actual illustration data:
-    const plan2CashValueRate_0_10 = 6.88;   // Years 10-20: 6.88% CAGR (from real data)
-    const plan2CashValueRate_10_20 = 5.24;  // Years 20-30: 5.24% CAGR (from real data)
-    const plan2CashValueRate_20_plus = 4.61; // Years 30-40: 4.61% CAGR (from real data)
+    // Rates are post-premium INTERNAL growth, measured from the end of the contribution period.
+    // Prior value here was 6.88% (illustration yrs 10-20), but that window still included 2
+    // premium-paying years, so it over-counted growth. The true post-premium rate (illustration
+    // yr 12 -> yr 22: $738,631 -> $1,259,480) is ~5.48%.
+    const plan2CashValueRate_0_10 = 5.48;   // Proj yrs 0-10 (first decade after premiums end): ~5.5% post-premium internal growth
+    const plan2CashValueRate_10_20 = 5.24;  // Proj yrs 10-20: 5.24% CAGR (illustration yrs ~22-32, post-premium)
+    const plan2CashValueRate_20_plus = 4.61; // Proj yrs 20+: 4.61% CAGR (illustration yrs ~32-42, post-premium)
     
     const plan2DeathBenefitRate_0_10 = 3.00;  // Years 10-20: 3.00% CAGR (from real data)
     const plan2DeathBenefitRate_10_20 = 2.76; // Years 20-30: 2.76% CAGR (from real data)
@@ -869,7 +873,7 @@ function displayComparisonTable(comparisons) {
                     <strong>Plan 2 Growth Assumptions (Real MassMutual Data — Non-Guaranteed):</strong><br>
                     • Perpetual income continues unchanged<br>
                     • <strong>While Alive:</strong> Liquidity = Cash Value only (Net EPIG annuitized for income)<br>
-                    • Cash value grows tax-free: 6.88% (years 10-20), 5.24% (20-30), 4.61% (30-40)<br>
+                    • Cash value grows tax-deferred at ~5.5%/yr once premiums end, easing to ~5.2% then ~4.6% in later decades (non-guaranteed)<br>
                     • Death benefit grows: 3.00% (years 10-20), 2.76% (20-30), 2.93% (30-40)<br>
                     • <strong>At Death:</strong> Heirs receive Death Benefit + Net EPIG (assumes period-certain annuity)<br>
                     • Death Benefit = Cash Value + Net Amount at Risk (not additive!)
