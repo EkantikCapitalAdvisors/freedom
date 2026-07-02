@@ -6,9 +6,9 @@
 .ideal-profile-section {
     padding: 100px 0;
     background: linear-gradient(135deg, 
-        #0A1628 0%, 
-        #1a2841 50%, 
-        #0A1628 100%);
+        #10182B 0%, 
+        #1B2A4A 50%, 
+        #10182B 100%);
     position: relative;
     overflow: hidden;
 }
@@ -41,21 +41,21 @@
 
 .profile-badge {
     display: inline-block;
-    background: linear-gradient(135deg, var(--gold) 0%, #B8941F 100%);
-    color: #0A1628;
+    background: linear-gradient(135deg, var(--gold) 0%, #B08F3C 100%);
+    color: #10182B;
     font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 1.5px;
     padding: 10px 24px;
     border-radius: 50px;
     margin-bottom: 20px;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
 }
 
 .profile-title {
     font-size: 2.8rem;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Playfair Display', serif;
     font-weight: 600;
     color: #ffffff;
     margin: 0 0 20px 0;
@@ -140,13 +140,13 @@
 
 .profile-icon i {
     font-size: 28px;
-    color: #0A1628;
+    color: #10182B;
 }
 
 /* Card Title */
 .profile-card h3 {
     font-size: 1.4rem;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Playfair Display', serif;
     font-weight: 600;
     color: #ffffff;
     margin: 0 0 16px 0;

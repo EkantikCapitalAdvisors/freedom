@@ -5,7 +5,7 @@
 
 .floor-surge-section {
     padding: 100px 20px;
-    background: linear-gradient(135deg, #0A1628 0%, #1a2841 100%);
+    background: linear-gradient(135deg, #10182B 0%, #1B2A4A 100%);
     position: relative;
     overflow: hidden;
 }
@@ -48,7 +48,7 @@
 }
 
 .floor-surge-title {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Playfair Display', serif;
     font-size: 3rem;
     font-weight: 700;
     color: var(--white);
@@ -331,7 +331,7 @@
 }
 
 .content-block h3 {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'Playfair Display', serif;
     font-size: 1.8rem;
     color: var(--gold);
     margin-bottom: 20px;
@@ -450,7 +450,7 @@
 
 .important-note h4 {
     font-size: 1.15rem;
-    color: #FFC107;
+    color: #C8A951;
     margin-bottom: 15px;
     display: flex;
     align-items: center;

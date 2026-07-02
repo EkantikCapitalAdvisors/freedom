@@ -38,8 +38,8 @@ This is the official landing page for the Ekantik Capital Advisors (ECA) Foundin
 
 ### 🎨 Design Features
 
-- **Color Palette**: Midnight blue (#0A1628), Deep Navy, Gold accents (#E0A930), Cream, Silver
-- **Typography**: Cormorant Garamond (headings), Montserrat (body)
+- **Color Palette**: Ekantik brand system (matches accelerator.ekantikcapital.com) — Navy `#10182B` / `#131F38` / `#1B2A4A`, Gold `#C8A951` (hover `#B08F3C`), Ivory/text `#E9E7E2`, Slate `#64748B`
+- **Typography**: Playfair Display (headings), DM Sans (body), DM Mono (numerals/data)
 - **Responsive Design**: Mobile-first, fully responsive across all devices
 - **Animations**: GSAP ScrollTrigger for smooth scroll animations
 - **Icons**: Font Awesome 6.4.0
@@ -120,7 +120,7 @@ ekantik-capital-landing/
 - **Founding Member Consultation**: https://calendly.com/hd-ekantikcapital/30min
 
 ### CDN Resources (Auto-loaded)
-- Google Fonts (Cormorant Garamond, Montserrat)
+- Google Fonts (Playfair Display, DM Sans, DM Mono)
 - Font Awesome 6.4.0
 - GSAP Animation Library (gsap.min.js, ScrollTrigger.min.js)
 - Chart.js (chart.umd.min.js)
