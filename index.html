@@ -171,7 +171,7 @@
                 </div>
                 <div class="pillar-badge">
                     <div class="pillar-icon"><i class="fas fa-trophy"></i></div>
-                    <span>Fee Elimination Guarantee</span>
+                    <span>Fee Elimination Pathway</span>
                 </div>
                 <div class="pillar-badge">
                     <div class="pillar-icon"><i class="fas fa-handshake"></i></div>
@@ -501,7 +501,7 @@
             <div class="section-header-center">
                 <span class="title-small">Freedom Forever Component</span>
                 <h2 class="section-title">
-                    <span class="title-large">EPIG 500: Enduring Principal Protected Income & Growth</span>
+                    <span class="title-large">EPIG 500: Enduring Principal, Income & Growth</span>
                 </h2>
                 <p class="section-description">A rules-based S&P 500 strategy that matches market performance in bull years and shifts to 0% cash in down markets—delivering outperformance through drawdown avoidance, not market timing.</p>
             </div>
@@ -790,12 +790,12 @@
 
                     <div class="input-group">
                         <label class="input-label">
-                            EPIG Portfolio CAGR (%)
-                            <span class="tooltip-icon" data-tooltip="Expected annual growth rate for EPIG investments (applies to both plans)">
+                            Assumed annual growth rate (%)
+                            <span class="tooltip-icon" data-tooltip="A growth-rate assumption you choose (applies to both plans). Default 8%; above 10% is above long-run broad-equity averages — treat as a stress-test, not a plan.">
                                 <i class="fas fa-info-circle"></i>
                             </span>
                         </label>
-                        <input type="number" id="directCAGR" class="input-field" value="20" min="0" max="100" step="0.1">
+                        <input type="number" id="directCAGR" class="input-field" value="8" min="0" max="15" step="0.1">
                     </div>
 
                     <div class="input-group">
@@ -870,7 +870,7 @@
                                 <i class="fas fa-info-circle"></i>
                             </span>
                         </label>
-                        <input type="number" id="cvGrowthRate" class="input-field" value="4" min="0" max="20" step="0.1">
+                        <input type="number" id="cvGrowthRate" class="input-field" value="4" min="0" max="15" step="0.1">
                     </div>
 
                     <div class="input-group">
@@ -916,7 +916,7 @@
                     </div>
 
                     <!-- Warnings -->
-                    <div id="warningMessages" class="warning-messages"></div>
+                    <div id="warningBox" class="warning-messages"></div>
                 </div>
 
                 <!-- Right Column: Results -->
@@ -927,6 +927,10 @@
                     </div>
 
                     <div id="resultsContainer" class="results-container" style="display: none;">
+                        <!-- Equal-prominence hypothetical disclaimer (persistent, non-collapsible) -->
+                        <div class="calc-hypothetical-banner" style="background: rgba(200,169,81,0.08); border: 1px solid rgba(200,169,81,0.30); border-left: 4px solid var(--gold, #C8A951); border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; color: var(--cream, #E9E7E2); font-size: 1rem; line-height: 1.6;">
+                            <strong>Hypothetical, illustrative math at the assumptions you selected.</strong> Not a projection, forecast, or promise of any Ekantik strategy's results. Investing involves risk, including loss of principal. Past performance does not guarantee future results.
+                        </div>
                         <!-- Results Scorecard -->
                         <div class="results-scorecard">
                             <h3 class="results-title">
@@ -1133,7 +1137,7 @@
                             </div>
                             <div class="benefit-content">
                                 <h4>Flat Fee Structure</h4>
-                                <p>Flat annual fee locked in <strong>forever</strong> — no matter how large your portfolio grows. Your rate is set today and protected against future increases.</p>
+                                <p>Flat annual fee locked in <strong>forever</strong> — no matter how large your portfolio grows. Your rate is set today and locked against future increases.</p>
                             </div>
                         </div>
 
@@ -1712,7 +1716,7 @@
                                         
                                         <div class="benefit-item">
                                             <h4><i class="fas fa-star"></i> Priority Access</h4>
-                                            <p><strong>Guaranteed availability</strong> when capacity constraints arise. Founding members are never subject to waitlists or service limitations.</p>
+                                            <p><strong>Priority availability</strong> when capacity constraints arise. Founding members are never subject to waitlists or service limitations.</p>
                                         </div>
                                         
                                         <div class="benefit-item">
@@ -2085,7 +2089,7 @@
                         <div class="calendly-inline-widget" data-url="https://calendly.com/hd-ekantikcapital/30min?hide_gdpr_banner=1" style="min-width:280px;height:630px;"></div>
                         <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
 
-                        <p class="form-notice">Your information is protected and will never be shared.</p>
+                        <p class="form-notice">Your information is kept private and never shared.</p>
                     </div>
                 </div>
             </div>
