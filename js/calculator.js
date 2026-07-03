@@ -174,7 +174,7 @@ function gatherInputs() {
         contributionTiming: contributionTiming,
         
         // Plan 1
-        directCAGR: parseFloat(safeGetValue('directCAGR', '20')) || 20,
+        directCAGR: parseFloat(safeGetValue('directCAGR', '8')) || 8,
         taxRate: taxRate,
         perpetualRate: parseFloat(safeGetValue('perpetualRate', '7')) || 7,
         
@@ -204,6 +204,11 @@ function validateInputs() {
     // Warn if borrow percent is too high
     if (inputs.borrowPercent > 95) {
         warnings.push(`⚠️ Borrow % above 95% may not be realistic for policy lending`);
+    }
+
+    // Compliance guardrail: flag growth-rate assumptions above long-run equity averages
+    if (inputs.directCAGR > 10) {
+        warnings.push(`⚠️ A growth rate above 10% is above long-run broad-equity averages — treat as a stress-test, not a plan.`);
     }
     
     // Warn if loan balance might exceed 50% of cash value (simplified check)

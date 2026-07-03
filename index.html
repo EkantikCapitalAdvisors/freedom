@@ -33,6 +33,7 @@
     <link rel="stylesheet" href="css/floor-surge.css">
     <link rel="stylesheet" href="css/abundance-stack.css">
     <link rel="stylesheet" href="css/faq-grouped.css">
+    <link rel="stylesheet" href="css/freedom-calc-suite.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -171,7 +172,7 @@
                 </div>
                 <div class="pillar-badge">
                     <div class="pillar-icon"><i class="fas fa-trophy"></i></div>
-                    <span>Fee Elimination Guarantee</span>
+                    <span>Fee Elimination Pathway</span>
                 </div>
                 <div class="pillar-badge">
                     <div class="pillar-icon"><i class="fas fa-handshake"></i></div>
@@ -234,7 +235,7 @@
                 <h2 class="section-title">
                     <span class="title-large">Ideal Financial Freedom Setup</span>
                 </h2>
-                <p class="section-description">The four pillars of true financial independence—income, liquidity, protection, and legacy.</p>
+                <p class="section-description">The four pillars of true financial independence—income, liquidity, coverage, and legacy.</p>
             </div>
             
             <!-- Freedom Setup Diagram -->
@@ -501,7 +502,7 @@
             <div class="section-header-center">
                 <span class="title-small">Freedom Forever Component</span>
                 <h2 class="section-title">
-                    <span class="title-large">EPIG 500: Enduring Principal Protected Income & Growth</span>
+                    <span class="title-large">EPIG 500: Enduring Principal, Income & Growth</span>
                 </h2>
                 <p class="section-description">A rules-based S&P 500 strategy that matches market performance in bull years and shifts to 0% cash in down markets—delivering outperformance through drawdown avoidance, not market timing.</p>
             </div>
@@ -556,6 +557,79 @@
                     <p>Avoiding large drawdowns by moving to cash preserves capital and improves long-term compounding—because steep losses require outsized gains just to break even</p>
                 </div>
             </div>
+
+            <!-- CALC-01 · Volatility Tax Meter (+ G2 Asymmetry Seesaw) -->
+            <section class="fcalc" id="calc-volatility-tax" data-aos="fade-up" aria-labelledby="vtTitle">
+                <div class="fcalc__head">
+                    <span class="fcalc__kicker">◆ The Volatility Tax</span>
+                    <h3 class="fcalc__title" id="vtTitle">What does a drawdown actually cost you?</h3>
+                    <p class="fcalc__intro">Move the sliders — the math is yours to check.</p>
+                </div>
+
+                <div class="fcalc__panel">
+                    <div class="fcalc__controls">
+                        <div>
+                            <label class="fcalc__label" for="vtLoss">Drawdown <span class="fcalc__val" id="vtLossVal">−30%</span></label>
+                            <input class="fcalc__slider" type="range" id="vtLoss" min="5" max="60" step="1" value="30">
+                        </div>
+                        <div>
+                            <label class="fcalc__label" for="vtRate">Recovery rate <span class="fcalc__val" id="vtRateVal">8%</span></label>
+                            <input class="fcalc__slider" type="range" id="vtRate" min="1" max="15" step="1" value="8">
+                        </div>
+                    </div>
+
+                    <div class="fcalc__readout">
+                        <div class="fcalc__bignum" id="vtRecovery">42.86%</div>
+                        <div class="fcalc__biglabel">gain required just to break even</div>
+                        <div class="fcalc__years" id="vtYears">≈ 4.6 years to climb back at 8%/yr</div>
+                    </div>
+
+                    <div class="fcalc__seesaw" role="img" aria-label="A small loss weight on the left and a larger required-recovery weight on the right, illustrating recovery asymmetry.">
+                        <svg viewBox="0 0 400 210" xmlns="http://www.w3.org/2000/svg">
+                            <g id="vtPlank" transform="rotate(-9 200 150)">
+                                <rect x="40" y="146" width="320" height="8" rx="4" fill="#E9E7E2"></rect>
+                                <circle id="vtWLoss" cx="72" cy="139" r="14.6" fill="#C0392B"></circle>
+                                <circle id="vtWRec" cx="328" cy="139" r="20" fill="#C8A951"></circle>
+                            </g>
+                            <polygon points="200,150 182,196 218,196" fill="#C8A951"></polygon>
+                            <rect x="150" y="196" width="100" height="6" rx="3" fill="rgba(200,169,81,.4)"></rect>
+                        </svg>
+                    </div>
+
+                    <p class="fcalc__hook" id="vtHook">Lose 30%, and you need 43% just to get back to even. <strong>The market doesn’t refund your time.</strong></p>
+                </div>
+
+                <div class="fcalc__panel">
+                    <h4 class="fcalc__subtitle">Same average, different journey</h4>
+                    <div class="fcalc__controls">
+                        <div>
+                            <label class="fcalc__label" for="vtMean">Average return <span class="fcalc__val" id="vtMeanVal">8%</span></label>
+                            <input class="fcalc__slider" type="range" id="vtMean" min="1" max="15" step="1" value="8">
+                        </div>
+                        <div>
+                            <label class="fcalc__label" for="vtVol">Volatility (±) <span class="fcalc__val" id="vtVolVal">±20%</span></label>
+                            <input class="fcalc__slider" type="range" id="vtVol" min="0" max="40" step="1" value="20">
+                        </div>
+                    </div>
+                    <div class="fcalc__compare">
+                        <div class="fcalc__compare-row is-steady">
+                            <span class="fcalc__compare-label">Steady path<br><small id="vtSteadyGeo">geometric 8.00%/yr</small></span>
+                            <span class="fcalc__mono" id="vtSteady">$215,892</span>
+                        </div>
+                        <div class="fcalc__compare-row is-volatile">
+                            <span class="fcalc__compare-label">Volatile path<br><small id="vtVolatileGeo">geometric 6.13%/yr</small></span>
+                            <span>
+                                <span class="fcalc__mono" id="vtVolatile">$181,344</span>
+                                <span class="fcalc__gap" id="vtGap"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="fcalc__note">Volatility is a tax on compounding — this is arithmetic, not opinion. ($100,000 over 10 years.)</p>
+                </div>
+
+                <div class="fcalc__disclaimer">Hypothetical, illustrative math at the assumptions you selected. Not a projection, forecast, or promise of any Ekantik strategy’s results. Investing involves risk, including loss of principal. Past performance does not guarantee future results.</div>
+                <a class="fcalc__link" href="https://epig500.ekantikcapital.com/" target="_blank" rel="noopener">How EPIG 500 is designed to pursue drawdown avoidance →</a>
+            </section>
 
             <!-- Learn More: Dedicated EPIG 500 Site -->
             <div class="epig500-learn-more" data-aos="fade-up" data-aos-delay="600" style="max-width: 820px; margin: 50px auto 0; padding: 40px; text-align: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 16px;">
@@ -654,7 +728,7 @@
                         </div>
                         <div class="abundance-bullet">
                             <i class="fas fa-arrow-up"></i>
-                            <span><strong>Death Benefit:</strong> Protection + legacy layer independent of timing</span>
+                            <span><strong>Death Benefit:</strong> Coverage + legacy layer independent of timing</span>
                         </div>
                     </div>
 
@@ -790,12 +864,12 @@
 
                     <div class="input-group">
                         <label class="input-label">
-                            EPIG Portfolio CAGR (%)
-                            <span class="tooltip-icon" data-tooltip="Expected annual growth rate for EPIG investments (applies to both plans)">
+                            Assumed annual growth rate (%)
+                            <span class="tooltip-icon" data-tooltip="A growth-rate assumption you choose (applies to both plans). Default 8%; above 10% is above long-run broad-equity averages — treat as a stress-test, not a plan.">
                                 <i class="fas fa-info-circle"></i>
                             </span>
                         </label>
-                        <input type="number" id="directCAGR" class="input-field" value="20" min="0" max="100" step="0.1">
+                        <input type="number" id="directCAGR" class="input-field" value="8" min="0" max="15" step="0.1">
                     </div>
 
                     <div class="input-group">
@@ -870,7 +944,7 @@
                                 <i class="fas fa-info-circle"></i>
                             </span>
                         </label>
-                        <input type="number" id="cvGrowthRate" class="input-field" value="4" min="0" max="20" step="0.1">
+                        <input type="number" id="cvGrowthRate" class="input-field" value="4" min="0" max="15" step="0.1">
                     </div>
 
                     <div class="input-group">
@@ -916,7 +990,7 @@
                     </div>
 
                     <!-- Warnings -->
-                    <div id="warningMessages" class="warning-messages"></div>
+                    <div id="warningBox" class="warning-messages"></div>
                 </div>
 
                 <!-- Right Column: Results -->
@@ -927,6 +1001,10 @@
                     </div>
 
                     <div id="resultsContainer" class="results-container" style="display: none;">
+                        <!-- Equal-prominence hypothetical disclaimer (persistent, non-collapsible) -->
+                        <div class="calc-hypothetical-banner" style="background: rgba(200,169,81,0.08); border: 1px solid rgba(200,169,81,0.30); border-left: 4px solid var(--gold, #C8A951); border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; color: var(--cream, #E9E7E2); font-size: 1rem; line-height: 1.6;">
+                            <strong>Hypothetical, illustrative math at the assumptions you selected.</strong> Not a projection, forecast, or promise of any Ekantik strategy's results. Investing involves risk, including loss of principal. Past performance does not guarantee future results.
+                        </div>
                         <!-- Results Scorecard -->
                         <div class="results-scorecard">
                             <h3 class="results-title">
@@ -1133,7 +1211,7 @@
                             </div>
                             <div class="benefit-content">
                                 <h4>Flat Fee Structure</h4>
-                                <p>Flat annual fee locked in <strong>forever</strong> — no matter how large your portfolio grows. Your rate is set today and protected against future increases.</p>
+                                <p>Flat annual fee locked in <strong>forever</strong> — no matter how large your portfolio grows. Your rate is set today and locked against future increases.</p>
                             </div>
                         </div>
 
@@ -1712,7 +1790,7 @@
                                         
                                         <div class="benefit-item">
                                             <h4><i class="fas fa-star"></i> Priority Access</h4>
-                                            <p><strong>Guaranteed availability</strong> when capacity constraints arise. Founding members are never subject to waitlists or service limitations.</p>
+                                            <p><strong>Priority availability</strong> when capacity constraints arise. Founding members are never subject to waitlists or service limitations.</p>
                                         </div>
                                         
                                         <div class="benefit-item">
@@ -2085,7 +2163,7 @@
                         <div class="calendly-inline-widget" data-url="https://calendly.com/hd-ekantikcapital/30min?hide_gdpr_banner=1" style="min-width:280px;height:630px;"></div>
                         <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
 
-                        <p class="form-notice">Your information is protected and will never be shared.</p>
+                        <p class="form-notice">Your information is kept private and never shared.</p>
                     </div>
                 </div>
             </div>
@@ -2160,5 +2238,7 @@
     <script src="js/main.js"></script>
     <script src="js/calculator.js"></script>
     <script src="js/faq-grouped.js"></script>
+    <script src="js/freedom-engine.js"></script>
+    <script src="js/freedom-calc-suite.js"></script>
 </body>
 </html>
