@@ -45,6 +45,9 @@ check('V6', 'fv $1M @ 8% 10y', rD(E.fv(1000000, 0.08, 10)), 2158925);
 // V7 fvAnnuity
 check('V7', 'fvAnnuity $10K/yr @ 8% 10y end', rD(E.fvAnnuity(10000, 0.08, 10, 'end')), 144866);
 
+// V11 requiredContribution (inverse of V7 — round trip)
+check('V11', 'requiredContribution $144,866 @ 8% 10y', rD(E.requiredContribution(144866, 0.08, 10, 'end')), 10000);
+
 // V8 fcr
 check('V8', 'fcr 150K/120K', E.fcr(150000, 120000), 1.25);
 

@@ -360,8 +360,8 @@ Interactive, compliance-first calculators (per the internal Calculator Suite spe
 
 **Compliance layer (spec §1):** growth-rate inputs default 8%, bounded 0–15%, amber warning >10%; a persistent equal-prominence hypothetical disclaimer sits atop every results panel; forbidden strings (`guarantee`, `protected`, …) remediated outside legally required disclaimer text.
 
-**Shipped:** CALC-01 Volatility Tax Meter (+ G2 Asymmetry Seesaw), under the EPIG 500 section.
-**Next:** CALC-02 (Freedom Number/FCR), CALC-04 (Cost of Waiting), CALC-03 (Fee Drag — retires the $259,038 static claim).
+**Shipped (Tier 1):** CALC-01 Volatility Tax Meter (+ G2 Seesaw, EPIG 500 section), CALC-02 Freedom Number + FCR Gauge (under hero), CALC-03 Fee Drag Comparator (membership — replaces the old static $259,038 claim with reproducible math), CALC-04 Cost of Waiting Meter (before the final CTA).
+**Next (Tier 2):** CALC-05 Reservoir Simulator, CALC-06 Sequence-of-Returns, CALC-07 Charter Solver, CALC-08 Two-Path v2 upgrade.
 
 ---
 

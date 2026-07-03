@@ -227,6 +227,71 @@
         </div>
     </section>
 
+    <!-- CALC-02 · Freedom Number + FCR Gauge -->
+    <section class="fcalc-section" id="calc-freedom-number" aria-labelledby="fnTitle">
+      <div class="fcalc">
+        <div class="fcalc__head">
+          <span class="fcalc__kicker">◆ Your Freedom Number</span>
+          <h3 class="fcalc__title" id="fnTitle">What does freedom cost — and how covered are you today?</h3>
+          <p class="fcalc__intro">Escape velocity: the capital at which your portfolio’s thrust clears the gravity of your expenses.</p>
+        </div>
+
+        <div class="fcalc__panel">
+          <div class="fcalc__controls">
+            <div>
+              <label class="fcalc__label" for="fnExpenses">Monthly freedom expenses <span class="fcalc__val" id="fnExpVal">$10,000/mo</span></label>
+              <input class="fcalc__slider" type="range" id="fnExpenses" min="3000" max="50000" step="500" value="10000">
+            </div>
+          </div>
+
+          <p class="fcalc__note" style="margin-bottom:10px;">Support-rate archetypes (illustrative — each trades off liquidity, perpetuity, and scalability):</p>
+          <div class="fchips">
+            <button class="fchip is-active" data-rate="0.04"><span class="fchip__rate">4%</span><span class="fchip__tag">Stock withdrawal</span></button>
+            <button class="fchip" data-rate="0.06"><span class="fchip__rate">6%</span><span class="fchip__tag">Dividend income</span></button>
+            <button class="fchip" data-rate="0.07"><span class="fchip__rate">7%</span><span class="fchip__tag">Annuity</span></button>
+            <button class="fchip" data-rate="0.08"><span class="fchip__rate">8%</span><span class="fchip__tag">Blended</span></button>
+            <button class="fchip" data-rate="0.10"><span class="fchip__rate">10%</span><span class="fchip__tag">Targeted, not guaranteed</span></button>
+          </div>
+
+          <div class="fcalc__readout">
+            <div class="fcalc__bignum" id="fnNumber">$3,000,000</div>
+            <div class="fcalc__biglabel">capital your freedom requires at the selected rate</div>
+          </div>
+
+          <div class="fbars" id="fnBars">
+            <div class="fbar-row" id="fnBar-4"><span class="fbar-key">4%</span><div class="fbar-track"><div class="fbar-fill"></div><span class="fbar-amt"></span></div></div>
+            <div class="fbar-row" id="fnBar-6"><span class="fbar-key">6%</span><div class="fbar-track"><div class="fbar-fill"></div><span class="fbar-amt"></span></div></div>
+            <div class="fbar-row" id="fnBar-7"><span class="fbar-key">7%</span><div class="fbar-track"><div class="fbar-fill"></div><span class="fbar-amt"></span></div></div>
+            <div class="fbar-row" id="fnBar-8"><span class="fbar-key">8%</span><div class="fbar-track"><div class="fbar-fill"></div><span class="fbar-amt"></span></div></div>
+            <div class="fbar-row" id="fnBar-10"><span class="fbar-key">10%</span><div class="fbar-track"><div class="fbar-fill"></div><span class="fbar-amt"></span></div></div>
+          </div>
+          <p class="fcalc__note">Capital required to fund the same income — the higher the (illustrative) support rate, the less capital, with different tradeoffs.</p>
+        </div>
+
+        <div class="fcalc__panel">
+          <h4 class="fcalc__subtitle">Freedom isn’t a feeling. It’s a ratio.</h4>
+          <div class="fcalc__controls">
+            <div>
+              <label class="fcalc__label" for="fnIncome">Your current support income (optional, $/yr)</label>
+              <input class="fnum-input" type="number" id="fnIncome" min="0" step="1000" placeholder="e.g. 90000">
+            </div>
+          </div>
+          <div class="fgauge">
+            <div class="fgauge-track">
+              <div class="fgauge-fill" id="fnGaugeFill" style="width:0%"></div>
+              <div class="fgauge-mark" style="left:50%"><span>1.0 break-even</span></div>
+              <div class="fgauge-mark" style="left:62.5%"><span>1.25 freedom</span></div>
+            </div>
+            <div class="fgauge-status" id="fnStatus"></div>
+            <div class="fgauge-hint" id="fnHint">Add your current support income to see your Freedom Coverage Ratio.</div>
+          </div>
+          <p class="fcalc__hook"><strong>FCR ≥ 1.25</strong> — income covering life with margin. That’s the page’s own published standard.</p>
+        </div>
+
+        <div class="fcalc__disclaimer">Hypothetical, illustrative math at the assumptions you selected. Support-rate archetypes are illustrative, not offers; the 10% archetype is a target, not a guarantee. Not a projection or promise of any Ekantik strategy’s results. Investing involves risk, including loss of principal.</div>
+      </div>
+    </section>
+
     <!-- Ideal Financial Freedom Setup -->
     <section id="freedom-setup" class="freedom-setup">
         <div class="container">
@@ -1177,7 +1242,7 @@
                                 <i class="fas fa-trophy"></i>
                             </div>
                             <div class="callout-text">
-                                <strong>🎯 Founding Member Advantage:</strong> Save <strong>~$259,038+ over 10 years</strong> + gain lifetime wealth management with locked-in founding rates, priority service, and ongoing portfolio optimization. Standard members miss this forever.
+                                <strong>🎯 Founding Member Advantage:</strong> Save <strong>six figures over 10 years</strong> versus a standard AUM fee — model your exact number in the Fee Drag calculator below — plus lifetime wealth management with locked-in founding rates, priority service, and ongoing portfolio optimization. Standard members miss this forever.
                             </div>
                         </div>
                     </div>
@@ -1285,7 +1350,7 @@
                             <div class="benefit-content">
                                 <h4>1-Year Fee Calculation Example</h4>
                                 <p><strong>$1MM portfolio</strong> → <strong class="highlight-red">~$20-30K annual coordination fees</strong> based on the 0.75%-2.5% industry standard, potentially more with account minimum fees and transaction charges.</p>
-                                <p class="comparison-note"><strong class="highlight-red">~$259,038 less over 10 years</strong> compared to founding rate</p>
+                                <p class="comparison-note"><strong class="highlight-red">six figures less over 10 years</strong> vs. the founding flat rate — see the Fee Drag calculator</p>
                             </div>
                         </div>
 
@@ -1341,6 +1406,55 @@
                         </a>
                     </div>
                 </div>
+            </div>
+
+            <!-- CALC-03 · Fee Drag Comparator (reproducible math behind the fee-savings claim) -->
+            <div class="fcalc" id="calc-fee-drag" aria-labelledby="fdTitle" style="margin-top:56px;">
+              <div class="fcalc__head">
+                <span class="fcalc__kicker">◆ The Fee Drag</span>
+                <h3 class="fcalc__title" id="fdTitle">What does the industry-standard fee model cost over a decade?</h3>
+                <p class="fcalc__intro">The AUM headwind: a percentage of everything, every year — compounding against you.</p>
+              </div>
+
+              <div class="fcalc__panel">
+                <div class="fcalc__controls">
+                  <div>
+                    <label class="fcalc__label" for="fdPortfolio">Portfolio <span class="fcalc__val" id="fdPortfolioVal">$1,000,000</span></label>
+                    <input class="fcalc__slider" type="range" id="fdPortfolio" min="100000" max="5000000" step="50000" value="1000000">
+                  </div>
+                  <div>
+                    <label class="fcalc__label" for="fdGross">Gross growth <span class="fcalc__val" id="fdGrossVal">8%</span></label>
+                    <input class="fcalc__slider" type="range" id="fdGross" min="0" max="15" step="1" value="8">
+                  </div>
+                  <div>
+                    <label class="fcalc__label" for="fdAum">AUM fee <span class="fcalc__val" id="fdAumVal">1.50%</span></label>
+                    <input class="fcalc__slider" type="range" id="fdAum" min="0.75" max="2.5" step="0.05" value="1.5">
+                  </div>
+                  <div>
+                    <label class="fcalc__label" for="fdFlat">Founding flat fee <span class="fcalc__val" id="fdFlatVal">$10,000/yr</span></label>
+                    <input class="fcalc__slider" type="range" id="fdFlat" min="5000" max="15000" step="500" value="10000">
+                  </div>
+                  <div>
+                    <label class="fcalc__label" for="fdYears">Horizon <span class="fcalc__val" id="fdYearsVal">10 yrs</span></label>
+                    <input class="fcalc__slider" type="range" id="fdYears" min="5" max="30" step="1" value="10">
+                  </div>
+                </div>
+                <div id="fdWarn" style="display:none;font-size:.85rem;color:#E0857B;text-align:center;margin:-8px 0 12px;">A growth rate above 10% is above long-run broad-equity averages — treat as a stress-test, not a plan.</div>
+
+                <div class="fcalc__readout">
+                  <div class="fcalc__bignum" id="fdGap">$136,922</div>
+                  <div class="fcalc__biglabel" id="fdGapLabel">more wealth on the flat-fee path over 10 years</div>
+                </div>
+
+                <div class="fbars">
+                  <div class="fbar-row"><span class="fbar-key">AUM</span><div class="fbar-track"><div class="fbar-fill" id="fdAumBar" style="background:linear-gradient(90deg,#8E2C22,#C0392B);"></div><span class="fbar-amt" id="fdAumFees"></span></div></div>
+                  <div class="fbar-row is-active"><span class="fbar-key">Flat</span><div class="fbar-track"><div class="fbar-fill" id="fdFlatBar"></div><span class="fbar-amt" id="fdFlatFees"></span></div></div>
+                </div>
+                <p class="fcalc__note">Cumulative fees paid (the "fee mountain"). Lost compounding on AUM fees: <strong id="fdLost" class="flive"></strong> · AUM fees pass 10% of your starting capital by <strong id="fdCross" class="flive"></strong>.</p>
+                <p class="fcalc__hook">The AUM model has one design flaw: <strong>the better you do, the more you pay.</strong></p>
+              </div>
+
+              <div class="fcalc__disclaimer">Illustrative math of a generic industry-standard AUM fee model versus a flat fee, at the assumptions you selected — not a named-competitor claim, projection, or promise. The founding flat fee is a structural design; fee elimination follows a Pathway, not a guarantee. Investing involves risk, including loss of principal.</div>
             </div>
 
             <!-- Bottom CTA -->
@@ -2096,6 +2210,60 @@
         </div>
     </section>
 
+    <!-- CALC-04 · Cost of Waiting Meter -->
+    <section class="fcalc-section" id="calc-cost-of-waiting" aria-labelledby="cwTitle">
+      <div class="fcalc">
+        <div class="fcalc__head">
+          <span class="fcalc__kicker">◆ The Cost of Waiting</span>
+          <h3 class="fcalc__title" id="cwTitle">What does each year of delay cost?</h3>
+          <p class="fcalc__intro">Compounding is a moving walkway. Every year off it must be repaid at sprint pace.</p>
+        </div>
+
+        <div class="fcalc__panel">
+          <div class="fcalc__controls">
+            <div>
+              <label class="fcalc__label" for="cwGoal">Goal amount <span class="fcalc__val" id="cwGoalVal">$1,000,000</span></label>
+              <input class="fnum-input" type="number" id="cwGoal" min="50000" step="50000" value="1000000">
+            </div>
+            <div>
+              <label class="fcalc__label" for="cwYears">Years available <span class="fcalc__val" id="cwYearsVal">20 yrs</span></label>
+              <input class="fcalc__slider" type="range" id="cwYears" min="5" max="40" step="1" value="20">
+            </div>
+            <div>
+              <label class="fcalc__label" for="cwRate">Assumed growth rate <span class="fcalc__val" id="cwRateVal">8%</span></label>
+              <input class="fcalc__slider" type="range" id="cwRate" min="0" max="15" step="1" value="8">
+            </div>
+            <div>
+              <label class="fcalc__label" for="cwDelay">Delay before starting <span class="fcalc__val" id="cwDelayVal">5 yrs</span></label>
+              <input class="fcalc__slider" type="range" id="cwDelay" min="0" max="10" step="1" value="5">
+            </div>
+          </div>
+          <div id="cwWarn" style="display:none;font-size:.85rem;color:#E0857B;text-align:center;margin:-8px 0 12px;">A growth rate above 10% is above long-run broad-equity averages — treat as a stress-test, not a plan.</div>
+
+          <div style="text-align:center;">
+            <div class="fcalc__toggle">
+              <button class="is-active" data-frame="lift">Heavier lift</button>
+              <button data-frame="shortfall">Or fall short</button>
+            </div>
+          </div>
+
+          <div class="fcalc__readout">
+            <div class="fcalc__bignum" id="cwHeadline">+69%</div>
+            <div class="fcalc__biglabel" id="cwHeadLabel">heavier annual lift from waiting 5 years</div>
+          </div>
+
+          <div class="fcalc__compare">
+            <div class="fcalc__compare-row is-steady"><span class="fcalc__compare-label">Start now</span><span class="fcalc__mono" id="cwNow">$21,852/yr</span></div>
+            <div class="fcalc__compare-row is-volatile"><span class="fcalc__compare-label">Start after the delay</span><span class="fcalc__mono" id="cwLater">$36,830/yr</span></div>
+          </div>
+          <p class="fcalc__note">Compounding forgone on the goal while you read this page: <span class="flive" id="cwLive">$0</span></p>
+          <p class="fcalc__hook" id="cwHook">Waiting 5 years doesn’t cost 5 years. <strong>At 8%, it’s a 69% heavier annual lift.</strong></p>
+        </div>
+
+        <div class="fcalc__disclaimer">Pure time-value-of-money math at the assumptions you selected — no strategy attached. Hypothetical and illustrative, not a projection, forecast, or promise. Investing involves risk, including loss of principal.</div>
+      </div>
+    </section>
+
     <!-- Contact CTA -->
     <section id="contact" class="contact-section">
         <div class="container">
@@ -2123,7 +2291,7 @@
                                     <li><i class="fas fa-check-circle"></i> Fee elimination pathway</li>
                                     <li><i class="fas fa-check-circle"></i> Lifetime education community access</li>
                                 </ul>
-                                <p class="urgency-warning"><strong>After founding period closes:</strong> Standard members pay <span class="highlight-cost">~$259,038 more over 10 years</span> and miss lifetime access to the Financial Freedom Operating System.</p>
+                                <p class="urgency-warning"><strong>After founding period closes:</strong> Standard members can pay <span class="highlight-cost">six figures more over 10 years</span> (model it in the Fee Drag calculator) and miss lifetime access to the Financial Freedom Operating System.</p>
                             </div>
                         </div>
                         
