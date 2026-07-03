@@ -27,6 +27,11 @@
     return Math.pow(fvTarget / pv, 1 / years) - 1;
   }
 
+  // Level annual contribution required to reach fvTarget over `years` (inverse of fvAnnuity).
+  function requiredContribution(fvTarget, rate, years, timing) {
+    return fvTarget / fvAnnuity(1, rate, years, timing || 'end');
+  }
+
   // Gain required to recover a drawdown: L / (1 - L). `loss` is a magnitude fraction (0.30 = -30%).
   function recoveryGain(loss) {
     var L = Math.abs(loss);
@@ -108,7 +113,7 @@
   }
 
   var FreedomEngine = {
-    fv: fv, fvAnnuity: fvAnnuity, requiredRate: requiredRate,
+    fv: fv, fvAnnuity: fvAnnuity, requiredRate: requiredRate, requiredContribution: requiredContribution,
     recoveryGain: recoveryGain, geoMean: geoMean, waitingMultiplier: waitingMultiplier,
     capitalForIncome: capitalForIncome, fcr: fcr,
     feePathAUM: feePathAUM, feePathFlat: feePathFlat, sequencePath: sequencePath,

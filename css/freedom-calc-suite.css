@@ -113,3 +113,47 @@
 @media (max-width: 640px) {
   .fcalc { padding: 22px 18px; }
 }
+
+/* ---- page-level wrapper for standalone calculator sections ---- */
+.fcalc-section { padding: clamp(48px, 8vw, 88px) 20px; background: var(--midnight, #10182B); }
+
+/* ---- strategy chips (CALC-02) ---- */
+.fchips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 6px 0 4px; }
+.fchip {
+  flex: 1 1 auto; min-width: 120px; max-width: 180px;
+  padding: 12px 14px; border-radius: 10px; cursor: pointer;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(233,231,226,0.16);
+  color: var(--cream, #E9E7E2); font-family: var(--font-body); text-align: center;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.fchip:hover { border-color: rgba(200,169,81,0.5); }
+.fchip.is-active { border-color: var(--gold, #C8A951); background: rgba(200,169,81,0.10); }
+.fchip__rate { font-family: var(--font-mono, monospace); font-size: 1.15rem; color: var(--gold, #C8A951); font-weight: 500; }
+.fchip__tag { display: block; font-size: 0.72rem; color: rgba(233,231,226,0.55); margin-top: 3px; letter-spacing: .02em; }
+
+/* ---- capital bar race (CALC-02) ---- */
+.fbars { display: grid; gap: 10px; margin: 18px 0 6px; }
+.fbar-row { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 12px; }
+.fbar-key { font-family: var(--font-mono, monospace); font-size: 0.9rem; color: rgba(233,231,226,0.8); text-align: right; }
+.fbar-track { position: relative; height: 30px; background: rgba(255,255,255,0.04); border-radius: 6px; overflow: hidden; }
+.fbar-fill { height: 100%; background: linear-gradient(90deg, rgba(200,169,81,0.55), var(--gold, #C8A951)); border-radius: 6px; transition: width .35s ease; }
+.fbar-row.is-active .fbar-fill { background: var(--gold, #C8A951); }
+.fbar-amt { position: absolute; top: 0; left: 10px; height: 30px; display: flex; align-items: center; font-family: var(--font-mono, monospace); font-size: 0.85rem; color: var(--midnight, #10182B); font-weight: 600; }
+
+/* ---- FCR gauge (CALC-02) ---- */
+.fgauge { margin: 14px 0 4px; }
+.fgauge-track { position: relative; height: 16px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: visible; }
+.fgauge-fill { height: 100%; border-radius: 999px; transition: width .35s ease, background-color .35s ease; }
+.fgauge-mark { position: absolute; top: -6px; width: 2px; height: 28px; background: rgba(233,231,226,0.5); }
+.fgauge-mark span { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 0.7rem; color: rgba(233,231,226,0.6); }
+.fgauge-status { margin-top: 42px; text-align: center; font-family: var(--font-mono, monospace); font-size: 1.1rem; }
+.fgauge-hint { text-align: center; font-size: 0.85rem; color: rgba(233,231,226,0.55); margin-top: 6px; }
+
+/* ---- fee-drag + live counter (CALC-03/04) ---- */
+.ffee-note { font-size: 0.8rem; color: rgba(233,231,226,0.55); text-align: center; margin-top: 6px; }
+.flive { font-family: var(--font-mono, monospace); color: var(--gold, #C8A951); }
+.fcalc__toggle { display: inline-flex; gap: 6px; margin: 4px auto 16px; border: 1px solid rgba(233,231,226,0.16); border-radius: 999px; padding: 4px; }
+.fcalc__toggle button { background: transparent; border: 0; color: rgba(233,231,226,0.7); padding: 6px 14px; border-radius: 999px; cursor: pointer; font-family: var(--font-body); font-size: 0.85rem; }
+.fcalc__toggle button.is-active { background: var(--gold, #C8A951); color: var(--midnight, #10182B); font-weight: 600; }
+.fnum-input { width: 100%; padding: 12px 14px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(233,231,226,0.16); color: var(--cream, #E9E7E2); font-family: var(--font-mono, monospace); font-size: 1rem; }
+.fnum-input:focus-visible { outline: 2px solid var(--gold, #C8A951); outline-offset: 2px; }
