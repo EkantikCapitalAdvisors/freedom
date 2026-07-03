@@ -350,6 +350,21 @@ After deployment, verify:
 
 ---
 
+## 🧮 Freedom Calculator Suite
+
+Interactive, compliance-first calculators (per the internal Calculator Suite spec). Built on a shared, unit-tested engine — vanilla JS, no build step.
+
+- `js/freedom-engine.js` — pure financial functions (`fv`, `fvAnnuity`, `requiredRate`, `recoveryGain`, `geoMean`, `waitingMultiplier`, `capitalForIncome`, `fcr`, `feePathAUM`, `feePathFlat`, `sequencePath`, formatters). Zero UI/side effects.
+- `js/freedom-engine.test.js` — the spec §8 golden vectors (CI-blocking). Run: `node js/freedom-engine.test.js` (exit 1 on any failure).
+- `js/freedom-calc-suite.js` + `css/freedom-calc-suite.css` — widget controllers/styles.
+
+**Compliance layer (spec §1):** growth-rate inputs default 8%, bounded 0–15%, amber warning >10%; a persistent equal-prominence hypothetical disclaimer sits atop every results panel; forbidden strings (`guarantee`, `protected`, …) remediated outside legally required disclaimer text.
+
+**Shipped:** CALC-01 Volatility Tax Meter (+ G2 Asymmetry Seesaw), under the EPIG 500 section.
+**Next:** CALC-02 (Freedom Number/FCR), CALC-04 (Cost of Waiting), CALC-03 (Fee Drag — retires the $259,038 static claim).
+
+---
+
 ## 📝 License
 
 Proprietary - All rights reserved by Ekantik Capital Advisors
