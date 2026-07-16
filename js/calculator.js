@@ -1,6 +1,25 @@
 /**
  * Financial Freedom Outcomes Calculator
  * Compares Plan 1 (Direct Invest) vs Plan 2 (Whole Life + EPIG Borrowing)
+ *
+ * MODEL CONVENTIONS (v2 — symmetric comparison):
+ * 1. Income conversion is IDENTICAL for both plans: 70% of income-generating
+ *    capital converts to income at the Perpetual Income Rate; 30% stays liquid.
+ *    - Plan 1: 70% of after-tax portfolio annuitized.
+ *    - Plan 2: 70% of Net EPIG annuitized + income drawn against 70% of cash
+ *      value via tax-free policy loans (loan balance compounds at the policy
+ *      loan rate and offsets death benefit / cash value over time).
+ * 2. Life-annuity convention for BOTH plans: annuitized capital is consumed —
+ *    it pays income while alive and is worth $0 at death.
+ * 3. Legacy column = what heirs actually receive at death:
+ *    - Plan 1: the liquidity fund.
+ *    - Plan 2: max(death benefit, cash value) minus outstanding income loans,
+ *      plus the liquid EPIG remainder. (DB = CV + net amount at risk.)
+ * 4. Policy loan interest during accumulation is paid from EPIG annually, so
+ *    the EPIG portfolio loses compounding on those payments (not just the
+ *    nominal sum).
+ * 5. Lapse check: if the income-loan balance reaches cash value in the
+ *    long-term projection, the policy lapses and CV/DB values go to $0.
  */
 
 // ===================================
@@ -332,11 +351,11 @@ function calculatePlan1(inputs) {
     // Liquidity (30% liquid fund)
     const liquidity = liquidityFund;
     
-    // Legacy: Plan 1 has NO death benefit beyond the liquid fund
-    // Heirs receive the liquidity fund at death, but it's NOT additional
-    // To be consistent with Plan 2 (where legacy = death benefit, separate from liquidity)
-    // Plan 1 legacy should be $0 (no insurance death benefit)
-    const netLegacy = 0;
+    // Legacy: heirs receive the liquidity fund at death (the annuitized 70%
+    // is consumed by the life annuity — worth $0 at death, same convention
+    // applied to Plan 2's annuitized capital). There is no insurance death
+    // benefit in Plan 1, so legacy = the liquid fund itself.
+    const netLegacy = liquidityFund;
     
     return {
         yearlyData,
@@ -389,15 +408,20 @@ function calculatePlan2(inputs) {
         const interestPayment = loanBalance * (loanRate / 100);
         cumulativeInterest += interestPayment;
         
-        // EPIG investment growth (using same CAGR as Plan 1)
+        // EPIG investment growth (using same CAGR as Plan 1).
+        // Interest is PAID FROM EPIG each year, so the portfolio also loses
+        // the future compounding on those payments (deducting a nominal sum
+        // at the end would understate the true borrowing cost).
         if (contributionTiming === 'start') {
             epigValue += borrowAmount;
+            epigValue -= interestPayment;
             epigValue *= (1 + directCAGR / 100);
         } else {
             epigValue *= (1 + directCAGR / 100);
             epigValue += borrowAmount;
+            epigValue -= interestPayment;
         }
-        
+
         // Update loan balance: interest is paid from EPIG, only principal accrues
         loanBalance += borrowAmount;
         
@@ -415,52 +439,69 @@ function calculatePlan2(inputs) {
     
     // Calculate final metrics
     const totalPremiumsPaid = annualContribution * timeHorizon;
-    
-    // APPLES-TO-APPLES: Subtract cumulative interest from EPIG to reflect true cost
-    // This shows EPIG performance NET OF borrowing costs
-    const epigAfterInterest = epigValue - cumulativeInterest;
-    
-    // Calculate EPIG gains and tax
+
+    // epigValue is already NET of annual interest payments (paid from EPIG
+    // inside the loop above, including lost compounding).
+    const epigAfterInterest = epigValue;
+
+    // Calculate EPIG gains and tax (basis = borrowed amounts invested;
+    // interest treated as a pre-tax expense already deducted from the account)
     const totalBorrowed = annualContribution * timeHorizon * (borrowPercent / 100);
     const epigGains = epigAfterInterest - totalBorrowed;
-    const taxOnEPIGGains = epigGains * (inputs.taxRate / 100);
+    const taxOnEPIGGains = Math.max(0, epigGains) * (inputs.taxRate / 100);
     const epigAfterTax = epigAfterInterest - taxOnEPIGGains;
-    
+
     // Net EPIG after loan payoff (OUTSIDE policy - CAN be annuitized)
-    // Step 1: EPIG after interest and taxes
-    // Step 2: Subtract the principal loan balance to get net equity
     const netEPIGAfterLoanPayoff = Math.max(0, epigAfterTax - loanBalance);
-    
-    // CORRECTED: Perpetual income ONLY from Net EPIG (outside policy)
-    // Cash value inside policy CANNOT be annuitized
-    const annuitizableAmount = netEPIGAfterLoanPayoff;
-    const perpetualIncome = annuitizableAmount * (perpetualRate / 100);
-    
-    // APPLES-TO-APPLES: Liquidity = Cash Value only
-    // Net EPIG is already annuitized for income above, so it's NOT available as liquidity
-    // This matches Plan 1 where liquidity = 30% fund (after annuitizing 70%)
-    const totalLiquidity = cashValue;  // Only cash value - Net EPIG already annuitized
-    
-    // Death benefit
-    // Since we already paid off the loan from Net EPIG, there's no outstanding loan
-    // Death benefit is NOT reduced (loan was paid from EPIG)
+    // If EPIG can't cover the loan principal, the remainder is repaid from
+    // cash value (reducing CV and death benefit dollar-for-dollar)
+    const cvShortfall = Math.max(0, loanBalance - epigAfterTax);
+    const effectiveCashValue = Math.max(0, cashValue - cvShortfall);
+
+    // SYMMETRIC 70/30 INCOME CONVERSION — same convention as Plan 1:
+    // 70% of income-generating capital converts to income at perpetualRate,
+    // 30% stays liquid.
+    //  • Net EPIG (outside policy): 70% annuitized (life annuity — consumed).
+    //  • Cash value (inside policy, cannot be annuitized): income drawn as
+    //    TAX-FREE POLICY LOANS at perpetualRate on 70% of CV. The loan
+    //    balance compounds at the policy loan rate and offsets CV/death
+    //    benefit in the long-term projection.
+    const epigAnnuityIncome = (netEPIGAfterLoanPayoff * 0.70) * (perpetualRate / 100);
+    const cvLoanIncomeDraw = (effectiveCashValue * 0.70) * (perpetualRate / 100);
+    const perpetualIncome = epigAnnuityIncome + cvLoanIncomeDraw;
+    const annuitizableAmount = netEPIGAfterLoanPayoff * 0.70;
+    const liquidEPIGFund = netEPIGAfterLoanPayoff * 0.30;
+
+    // Liquidity at end of funding horizon (before income draws begin):
+    // full cash value + the liquid 30% EPIG remainder
+    const totalLiquidity = effectiveCashValue + liquidEPIGFund;
+
+    // Death benefit: loan principal repaid from EPIG (and CV if shortfall)
     const grossDeathBenefit = deathBenefit;
-    const netDeathBenefit = deathBenefit;  // No reduction - loan already paid
-    const netLegacy = netDeathBenefit - totalPremiumsPaid;
-    
+    const netDeathBenefit = Math.max(0, deathBenefit - cvShortfall);
+    // Legacy at end of horizon = what heirs receive: death benefit (which
+    // already INCLUDES cash value) + liquid EPIG remainder. The annuitized
+    // 70% of Net EPIG is consumed (life-annuity convention, both plans).
+    const netLegacy = netDeathBenefit + liquidEPIGFund;
+
     return {
         yearlyData,
         cashValue,
+        effectiveCashValue,  // CV after covering any EPIG loan shortfall
+        cvShortfall,
         epigValue,
-        epigAfterInterest,  // EPIG value minus cumulative interest cost
-        epigAfterTax,       // NEW: EPIG after interest and taxes
-        cumulativeInterest, // Total interest paid/accrued over time horizon
-        taxOnEPIGGains,     // NEW: Tax on EPIG gains
+        epigAfterInterest,  // EPIG net of annual interest payments
+        epigAfterTax,       // EPIG after interest and taxes
+        cumulativeInterest, // Total interest paid over time horizon
+        taxOnEPIGGains,     // Tax on EPIG gains
         loanBalance,
         totalPremiumsPaid,
         epigGains,
         netEPIGAfterLoanPayoff,
-        annuitizableAmount,  // Only the portion that can be annuitized
+        annuitizableAmount,  // 70% of Net EPIG (annuitized)
+        liquidEPIGFund,      // 30% of Net EPIG (stays liquid)
+        epigAnnuityIncome,   // income component from annuitized Net EPIG
+        cvLoanIncomeDraw,    // income component drawn via policy loans on CV
         totalLiquidity,
         perpetualIncome,
         grossDeathBenefit,
@@ -638,6 +679,7 @@ function createResultsStructure() {
                             <th>Borrowed Amount</th>
                             <th>Total Loan Balance</th>
                             <th>Interest Payment</th>
+                            <th>Cumulative Interest</th>
                             <th>EPIG Portfolio Value</th>
                             <th>Policy Cash Value</th>
                         </tr>
@@ -672,34 +714,32 @@ function displayResults(plan1, plan2) {
     console.log('Plan 1 perpetual income:', plan1.perpetualIncome);
     console.log('Plan 2 perpetual income:', plan2.perpetualIncome);
     
+    // Null-safe setter: a missing element must not abort the remaining fields
+    // (the results markup differs between index.html and calculator.html)
+    const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = formatCurrency(value);
+        else console.warn(`Result element '${id}' not found — skipped`);
+    };
+
     // Plan 1 Results
-    try {
-        document.getElementById('plan1Income').textContent = formatCurrency(plan1.perpetualIncome);
-        document.getElementById('plan1Liquidity').textContent = formatCurrency(plan1.liquidity);
-        document.getElementById('plan1Legacy').textContent = formatCurrency(plan1.netLegacy);
-        document.getElementById('plan1AfterTax').textContent = formatCurrency(plan1.afterTaxCapital);
-        document.getElementById('plan1Annuitized').textContent = formatCurrency(plan1.annuitizedAmount);
-        document.getElementById('plan1Contributed').textContent = formatCurrency(plan1.totalContributed);
-        console.log('Plan 1 results populated successfully');
-    } catch (error) {
-        console.error('Error populating Plan 1 results:', error);
-    }
-    
+    setText('plan1Income', plan1.perpetualIncome);
+    setText('plan1Liquidity', plan1.liquidity);
+    setText('plan1Legacy', plan1.netLegacy);
+    setText('plan1AfterTax', plan1.afterTaxCapital);
+    setText('plan1Annuitized', plan1.annuitizedAmount);
+    setText('plan1Contributed', plan1.totalContributed);
+
     // Plan 2 Results
-    try {
-        document.getElementById('plan2Income').textContent = formatCurrency(plan2.perpetualIncome);
-        document.getElementById('plan2Liquidity').textContent = formatCurrency(plan2.totalLiquidity);
-        document.getElementById('plan2Legacy').textContent = formatCurrency(plan2.netLegacy);
-        document.getElementById('plan2CashValue').textContent = formatCurrency(plan2.cashValue);
-        document.getElementById('plan2EPIG').textContent = formatCurrency(plan2.netEPIGAfterLoanPayoff);
-        document.getElementById('plan2Interest').textContent = formatCurrency(plan2.cumulativeInterest);
-        document.getElementById('plan2TaxOnGains').textContent = formatCurrency(plan2.taxOnEPIGGains);
-        document.getElementById('plan2GrossDB').textContent = formatCurrency(plan2.grossDeathBenefit);
-        document.getElementById('plan2Premiums').textContent = formatCurrency(plan2.totalPremiumsPaid);
-        console.log('Plan 2 results populated successfully');
-    } catch (error) {
-        console.error('Error populating Plan 2 results:', error);
-    }
+    setText('plan2Income', plan2.perpetualIncome);
+    setText('plan2Liquidity', plan2.totalLiquidity);
+    setText('plan2Legacy', plan2.netLegacy);
+    setText('plan2CashValue', plan2.cashValue);
+    setText('plan2EPIG', plan2.netEPIGAfterLoanPayoff);
+    setText('plan2Interest', plan2.cumulativeInterest);
+    setText('plan2TaxOnGains', plan2.taxOnEPIGGains);
+    setText('plan2GrossDB', plan2.grossDeathBenefit);
+    setText('plan2Premiums', plan2.totalPremiumsPaid);
     
     // Update component year (safe with null checks)
     try {
@@ -752,16 +792,17 @@ function displayResults(plan1, plan2) {
 // ===================================
 
 function generateComparisonTable(plan1, plan2, inputs) {
-    const { timeHorizon, taxRate, perpetualRate, currentAge } = inputs;
-    
+    const { timeHorizon, taxRate, perpetualRate, currentAge, loanRate } = inputs;
+
     // Starting values at end of contribution period
     const plan1PerpetualIncome = plan1.perpetualIncome;
     const plan1LiquidityStart = plan1.liquidity; // 30% liquid fund
-    
+
     const plan2PerpetualIncome = plan2.perpetualIncome;
-    const plan2CashValueStart = plan2.cashValue;
-    const plan2NetEPIGStart = plan2.netEPIGAfterLoanPayoff;
+    const plan2CashValueStart = plan2.effectiveCashValue;
+    const plan2LiquidEPIGStart = plan2.liquidEPIGFund; // 30% Net EPIG remainder
     const plan2DeathBenefitStart = plan2.netDeathBenefit;
+    const cvIncomeDraw = plan2.cvLoanIncomeDraw; // annual tax-free policy-loan draw
     
     // Growth rates
     const plan1BondRate = 5; // 5% bonds (taxable annually)
@@ -814,13 +855,27 @@ function generateComparisonTable(plan1, plan2, inputs) {
             plan2CashValue = valueAt20 * Math.pow(1 + plan2CashValueRate_20_plus / 100, years - 20);
         }
         
-        // Plan 2 Net EPIG: Reinvested in bonds (after-tax growth)
-        const plan2NetEPIG = plan2NetEPIGStart * Math.pow(1 + plan1AfterTaxBondRate / 100, years);
-        
-        // Plan 2 Liquidity (while alive): ONLY Cash Value
-        // Net EPIG is annuitized for income at Year 0, so NOT available as liquidity
-        // This matches Plan 1 where liquidity = 30% fund (after annuitizing 70%)
-        const plan2LiquidityAlive = plan2CashValue;  // Only cash value - Net EPIG annuitized
+        // Plan 2 liquid EPIG remainder (30%): reinvested in bonds (after-tax growth)
+        const plan2LiquidEPIG = plan2LiquidEPIGStart * Math.pow(1 + plan1AfterTaxBondRate / 100, years);
+
+        // Plan 2 income-loan balance: the annual tax-free policy-loan draws
+        // against cash value compound at the policy loan rate
+        const r = (loanRate || 0) / 100;
+        const incomeLoanBalance = years === 0 || cvIncomeDraw === 0
+            ? 0
+            : (r > 0
+                ? cvIncomeDraw * (Math.pow(1 + r, years) - 1) / r
+                : cvIncomeDraw * years);
+
+        // Lapse check: if the loan balance reaches cash value, the policy
+        // lapses — remaining CV/DB are consumed by the loan
+        const policyLapsed = years > 0 && cvIncomeDraw > 0 && incomeLoanBalance >= plan2CashValue;
+        const lapseRisk = !policyLapsed && cvIncomeDraw > 0 && incomeLoanBalance > plan2CashValue * 0.9;
+
+        // Plan 2 Liquidity (while alive): net cash value (after income loans)
+        // + the liquid 30% EPIG remainder. The annuitized 70% Net EPIG is
+        // consumed for income — same convention as Plan 1's annuitized 70%.
+        const plan2LiquidityAlive = (policyLapsed ? 0 : Math.max(0, plan2CashValue - incomeLoanBalance)) + plan2LiquidEPIG;
         
         // Plan 2 Death Benefit: Multi-tier growth (based on MassMutual illustration)
         let plan2DeathBenefit;
@@ -840,23 +895,31 @@ function generateComparisonTable(plan1, plan2, inputs) {
             plan2DeathBenefit = valueAt20 * Math.pow(1 + plan2DeathBenefitRate_20_plus / 100, years - 20);
         }
         
-        // CORRECTED: Death Benefit already INCLUDES cash value
-        // Death Benefit = Cash Value + Net Amount at Risk
-        // At death, heir receives: Death Benefit + Net EPIG (outside policy only)
-        const plan2LegacyAtDeath = plan2DeathBenefit + plan2NetEPIG;
-        
+        // Death Benefit already INCLUDES cash value (DB = CV + Net Amount at
+        // Risk), so it can never be less than CV. At death, heirs receive:
+        // (DB − outstanding income loans) + the liquid EPIG remainder.
+        // The annuitized 70% Net EPIG is consumed (life-annuity convention),
+        // exactly as Plan 1's annuitized 70% is.
+        const grossLegacyBase = Math.max(plan2DeathBenefit, plan2CashValue);
+        const plan2LegacyAtDeath = (policyLapsed ? 0 : Math.max(0, grossLegacyBase - incomeLoanBalance)) + plan2LiquidEPIG;
+
         comparisons.push({
             year: totalYears,
             age: ageAtYear,
             plan1Income: plan1PerpetualIncome,
             plan1Liquidity: plan1Liquidity,
-            plan1Legacy: 0, // Plan 1 has no guaranteed legacy
-            plan2Income: plan2PerpetualIncome,
+            plan1Legacy: plan1Liquidity, // heirs receive the liquidity fund
+            // After lapse no further policy loans can be drawn — only the
+            // annuitized EPIG income continues
+            plan2Income: policyLapsed ? plan2.epigAnnuityIncome : plan2PerpetualIncome,
             plan2LiquidityAlive: plan2LiquidityAlive, // While alive
             plan2LegacyAtDeath: plan2LegacyAtDeath,   // At death
             plan2DeathBenefit: plan2DeathBenefit,
             plan2CashValue: plan2CashValue,
-            plan2NetEPIG: plan2NetEPIG
+            plan2IncomeLoanBalance: incomeLoanBalance,
+            plan2LiquidEPIG: plan2LiquidEPIG,
+            policyLapsed,
+            lapseRisk
         });
     });
     
@@ -880,10 +943,10 @@ function displayComparisonTable(comparisons) {
             
             <div style="padding: 15px; background: #fff8e1; border-left: 4px solid #d4af37; border-radius: 4px; margin-bottom: 20px;">
                 <p style="margin: 0; font-size: 14px; color: #333; line-height: 1.6;">
-                    <i class="fas fa-info-circle" style="color: #d4af37;"></i> <strong>Default Example Based on Real MassMutual Illustration:</strong><br>
+                    <i class="fas fa-info-circle" style="color: #d4af37;"></i> <strong>Growth Rates Derived From a Real MassMutual Illustration:</strong><br>
                     MassMutual Whole Life 12-Pay | Select Preferred Non-Tobacco | Age 52, $50K/year for 12 years<br>
-                    Actual Values: Y10=$582K CV/$1.533M DB, Y20=$1.133M/$2.062M, Y30=$1.890M/$2.707M, Y40=$2.966M/$3.615M<br>
-                    <em>When you change inputs (age, amount, etc.), projections scale proportionally to approximate Select Preferred Non-Tobacco results.</em><br>
+                    Illustration values: Y10=$582K CV/$1.533M DB, Y20=$1.133M/$2.062M, Y30=$1.890M/$2.707M, Y40=$2.966M/$3.615M<br>
+                    <em>Only the cash-value and death-benefit GROWTH RATES are taken from this illustration. The starting death benefit is the value you enter above — set it to match your own policy illustration (the cited example shows ≈$1.53M at Year 10 for $50K/year).</em><br>
                     <strong style="color: #b8860b;">Non-guaranteed:</strong> These figures reflect MassMutual's current dividend scale, which is not guaranteed and can change. Actual results will differ; guaranteed values are lower.
                     <a href="documents/massmutual-illustration.pdf" target="_blank" rel="noopener" style="color: #d4af37; text-decoration: underline; margin-left: 10px;">📄 View Full Illustration (PDF)</a>
                 </p>
@@ -892,20 +955,21 @@ function displayComparisonTable(comparisons) {
             <div class="comparison-notes">
                 <div class="note-item plan1-note">
                     <strong>Plan 1 Growth Assumptions:</strong><br>
-                    • Perpetual income continues unchanged<br>
-                    • Liquidity fund (30%) invested in bonds at 5%<br>
-                    • Taxed annually at effective tax rate → Net ~3.75%/year<br>
-                    • <strong>At Death:</strong> Heirs receive liquidity fund only (no separate death benefit)<br>
-                    • Legacy shown as $0 (liquidity fund already counted above)
+                    • Income: 70% of after-tax capital annuitized at the perpetual rate (life annuity — consumed at death)<br>
+                    • Perpetual income continues unchanged (not inflation-adjusted)<br>
+                    • Liquidity fund (30%) invested in bonds at 5%, taxed annually → net ~3.75%/year<br>
+                    • <strong>At Death:</strong> Heirs receive the liquidity fund (shown in the Legacy column)
                 </div>
                 <div class="note-item plan2-note">
-                    <strong>Plan 2 Growth Assumptions (Real MassMutual Data — Non-Guaranteed):</strong><br>
-                    • Perpetual income continues unchanged<br>
-                    • <strong>While Alive:</strong> Liquidity = Cash Value only (Net EPIG annuitized for income)<br>
+                    <strong>Plan 2 Growth Assumptions (same 70/30 conversion as Plan 1; MassMutual rates non-guaranteed):</strong><br>
+                    • Income: 70% of Net EPIG annuitized (life annuity — consumed at death) <em>plus</em> tax-free policy loans drawn against 70% of cash value at the perpetual rate<br>
+                    • Income-loan balance compounds at the policy loan rate and reduces cash value / death benefit over time<br>
+                    • Liquid EPIG remainder (30%) invested in bonds at net ~3.75%/year<br>
                     • Cash value grows tax-deferred at ~5.5%/yr once premiums end, easing to ~5.2% then ~4.6% in later decades (non-guaranteed)<br>
                     • Death benefit grows: 3.00% (years 10-20), 2.76% (20-30), 2.93% (30-40)<br>
-                    • <strong>At Death:</strong> Heirs receive Death Benefit + Net EPIG (assumes period-certain annuity)<br>
-                    • Death Benefit = Cash Value + Net Amount at Risk (not additive!)
+                    • <strong>While Alive:</strong> Liquidity = (Cash Value − income loans) + liquid EPIG remainder<br>
+                    • <strong>At Death:</strong> Heirs receive (Death Benefit − income loans) + liquid EPIG remainder. Death Benefit = Cash Value + Net Amount at Risk (not additive!)<br>
+                    • ⚠ If income loans reach cash value, the policy lapses (flagged in the table)
                 </div>
             </div>
             
@@ -929,16 +993,25 @@ function displayComparisonTable(comparisons) {
                     <tbody>
     `;
     
+    let anyLapse = false;
+    let anyLapseRisk = false;
     comparisons.forEach((row, index) => {
+        if (row.policyLapsed) anyLapse = true;
+        if (row.lapseRisk) anyLapseRisk = true;
+        const lapseMarker = row.policyLapsed
+            ? ' <span title="Policy lapsed: income loans reached cash value" style="color:#c0392b;">⚠ lapsed</span>'
+            : (row.lapseRisk
+                ? ' <span title="Lapse risk: income loans exceed 90% of cash value" style="color:#b8860b;">⚠</span>'
+                : '');
         html += `
             <tr class="comparison-row ${index % 2 === 0 ? 'even' : 'odd'}">
                 <td class="year-cell"><strong>Year ${row.year}</strong><br><span style="font-size: 13px; font-weight: 400;">(Age ${row.age})</span></td>
                 <td class="plan1-cell">${formatCurrency(row.plan1Income)}/year</td>
                 <td class="plan1-cell">${formatCurrency(row.plan1Liquidity)}</td>
-                <td class="plan1-cell legacy-zero">$0</td>
-                <td class="plan2-cell">${formatCurrency(row.plan2Income)}/year</td>
-                <td class="plan2-cell">${formatCurrency(row.plan2LiquidityAlive)}</td>
-                <td class="plan2-cell legacy-value">${formatCurrency(row.plan2LegacyAtDeath)}</td>
+                <td class="plan1-cell legacy-value">${formatCurrency(row.plan1Legacy)}</td>
+                <td class="plan2-cell">${formatCurrency(row.plan2Income)}/year${row.policyLapsed ? '*' : ''}</td>
+                <td class="plan2-cell">${formatCurrency(row.plan2LiquidityAlive)}${lapseMarker}</td>
+                <td class="plan2-cell legacy-value">${formatCurrency(row.plan2LegacyAtDeath)}${lapseMarker}</td>
             </tr>
         `;
     });
@@ -951,8 +1024,13 @@ function displayComparisonTable(comparisons) {
             <div class="comparison-insights">
                 <div class="insight-box">
                     <i class="fas fa-lightbulb"></i>
-                    <strong>Key Insight:</strong> Plan 2's death benefit INCLUDES cash value (Death Benefit = Cash Value + Net Amount at Risk). At death, heirs receive the Death Benefit PLUS Net EPIG (outside policy), NOT Death Benefit + Cash Value + Net EPIG. While alive, you have access to Cash Value + Net EPIG as liquidity.
+                    <strong>Key Insight:</strong> Both plans convert capital to income under the SAME rule (70% at the perpetual rate, 30% stays liquid), so the columns compare like-for-like. Plan 2's death benefit INCLUDES cash value (Death Benefit = Cash Value + Net Amount at Risk); income drawn via policy loans is tax-free but accrues at the loan rate and reduces what heirs receive. Annuitized capital is consumed at death in both plans. Annuity income may be partially taxable; policy-loan income is generally tax-free — income-phase taxes are not modeled.
                 </div>
+                ${anyLapse || anyLapseRisk ? `
+                <div class="insight-box" style="border-left: 4px solid #c0392b; margin-top: 12px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Lapse Warning:</strong> Under these assumptions the policy-loan balance ${anyLapse ? 'reaches' : 'approaches'} the cash value in later years (rows marked ⚠). ${anyLapse ? 'After lapse, the CV/DB portion of liquidity and legacy is $0 and the tax-free treatment of prior loans may be lost (*income shown continues only from the annuitized EPIG portion). ' : ''}A real policy would need a lower draw rate, dividend offsets, or loan repayments to stay in force — review with your advisor.
+                </div>` : ''}
             </div>
         </div>
     `;
