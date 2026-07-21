@@ -355,6 +355,25 @@
     </section>
 
     <!-- §2 · The Instrument Panel (sample-client, illustrative — no gate) -->
+    <style>
+        .ip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 24px; margin-top: 32px; }
+        .ip-card { margin: 0; border: 1px solid rgba(212,175,55,0.25); border-radius: 12px; padding: 16px; background: rgba(255,255,255,0.03); cursor: zoom-in; transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
+        .ip-card:hover, .ip-card:focus-visible { border-color: rgba(212,175,55,0.6); transform: translateY(-2px); box-shadow: 0 18px 40px rgba(0,0,0,0.28); outline: none; }
+        .ip-card__frame { position: relative; border-radius: 8px; overflow: hidden; background: #0a1120; }
+        .ip-card__frame img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: top center; }
+        .ip-card__hint { position: absolute; right: 10px; bottom: 10px; display: inline-flex; gap: 6px; align-items: center; background: rgba(10,17,32,0.85); color: #E9E7E2; font-size: 12px; letter-spacing: 0.02em; padding: 5px 11px; border-radius: 999px; border: 1px solid rgba(212,175,55,0.45); opacity: 0; transform: translateY(4px); transition: opacity .2s ease, transform .2s ease; pointer-events: none; }
+        .ip-card:hover .ip-card__hint, .ip-card:focus-visible .ip-card__hint { opacity: 1; transform: translateY(0); }
+        .ip-card figcaption { margin-top: 14px; line-height: 1.55; }
+        .ip-lightbox { position: fixed; inset: 0; z-index: 2000; display: none; align-items: center; justify-content: center; padding: 24px; }
+        .ip-lightbox.active { display: flex; }
+        .ip-lightbox__overlay { position: absolute; inset: 0; background: rgba(6,10,20,0.92); backdrop-filter: blur(4px); }
+        .ip-lightbox__content { position: relative; z-index: 1; max-width: 1180px; width: 100%; }
+        .ip-lightbox__content img { display: block; width: 100%; height: auto; max-height: 82vh; object-fit: contain; border-radius: 10px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+        .ip-lightbox__cap { color: #E9E7E2; text-align: center; margin-top: 14px; font-size: 14px; }
+        .ip-lightbox__close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border-radius: 999px; border: 1px solid rgba(212,175,55,0.5); background: rgba(19,31,56,0.95); color: #E9E7E2; cursor: pointer; font-size: 18px; line-height: 1; z-index: 2; }
+        .ip-lightbox__close:hover { border-color: var(--gold, #C8A951); }
+        @media (prefers-reduced-motion: reduce) { .ip-card, .ip-card__hint { transition: none; } }
+    </style>
     <section id="instrument-panel" class="operationalization-flow">
         <div class="container">
             <div class="section-header-center">
@@ -365,36 +384,48 @@
                 <p class="section-description">Every founding charter runs on a live command center — your numbers, your quarters, your trajectory against the date we agreed in writing. Not a report about the plan. The plan itself, instrumented.</p>
             </div>
 
-            <div class="instrument-panel-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 32px;">
-                <!-- Asset slots: export deck appendix slides 20, 22, 24, 29, 31 as webp
-                     into images/instrument-panel/ and swap into the figures below.
-                     Every image must carry the visible SAMPLE CLIENT — ILLUSTRATIVE stamp. -->
-                <figure style="margin: 0; border: 1px solid rgba(212,175,55,0.25); border-radius: 12px; padding: 20px; background: rgba(255,255,255,0.03);">
-                    <img src="images/instrument-panel/ip-quarter-grid.webp" alt="Sample client dashboard, fully illustrative — the Command Center quarter grid: forty ninety-day boxes tracked against the written target date" loading="lazy" style="width: 100%; border-radius: 8px; margin-bottom: 16px; display: block;">
+            <div class="ip-grid">
+                <figure class="ip-card" role="button" tabindex="0" data-caption="The Quarter Grid — sample client, illustrative">
+                    <div class="ip-card__frame">
+                        <img src="images/instrument-panel/ip-quarter-grid.webp" alt="Sample client dashboard, fully illustrative — the Command Center quarter grid: forty ninety-day boxes tracked against the written target date" decoding="async" width="1920" height="1080">
+                        <span class="ip-card__hint">⤢ Click to enlarge</span>
+                    </div>
                     <figcaption>
                         <strong>The Quarter Grid.</strong> Forty boxes, ninety days each. Click any future quarter and simulate missing it — the dashboard shows you the cost before life charges it.
                     </figcaption>
                 </figure>
-                <figure style="margin: 0; border: 1px solid rgba(212,175,55,0.25); border-radius: 12px; padding: 20px; background: rgba(255,255,255,0.03);">
-                    <img src="images/instrument-panel/ip-trajectory.webp" alt="Sample client dashboard, fully illustrative — quarter-over-quarter progress: plan versus reality versus shocks, read against the target-year line" loading="lazy" style="width: 100%; border-radius: 8px; margin-bottom: 16px; display: block;">
+                <figure class="ip-card" role="button" tabindex="0" data-caption="The Trajectory — sample client, illustrative">
+                    <div class="ip-card__frame">
+                        <img src="images/instrument-panel/ip-trajectory.webp" alt="Sample client dashboard, fully illustrative — quarter-over-quarter progress: plan versus reality versus shocks, read against the target-year line" decoding="async" width="1920" height="1080">
+                        <span class="ip-card__hint">⤢ Click to enlarge</span>
+                    </div>
                     <figcaption>
                         <strong>The Trajectory.</strong> Your path read against the target-year line at conservative, base, and aggressive assumptions — with the first OFF-TRACK flag surfaced years early, while it's still fixable.
                     </figcaption>
                 </figure>
-                <figure style="margin: 0; border: 1px solid rgba(212,175,55,0.25); border-radius: 12px; padding: 20px; background: rgba(255,255,255,0.03);">
-                    <img src="images/instrument-panel/ip-payoff-race.webp" alt="Sample client dashboard, fully illustrative — debt burndown: every liability raced across payoff strategies, plan line versus weekly actuals" loading="lazy" style="width: 100%; border-radius: 8px; margin-bottom: 16px; display: block;">
+                <figure class="ip-card" role="button" tabindex="0" data-caption="The Payoff Race — sample client, illustrative">
+                    <div class="ip-card__frame">
+                        <img src="images/instrument-panel/ip-payoff-race.webp" alt="Sample client dashboard, fully illustrative — debt burndown: every liability raced across payoff strategies, plan line versus weekly actuals" decoding="async" width="1920" height="1080">
+                        <span class="ip-card__hint">⤢ Click to enlarge</span>
+                    </div>
                     <figcaption>
                         <strong>The Payoff Race.</strong> Every liability raced side by side across three payoff strategies, plan line versus weekly actuals — divergence visible immediately, not at year-end.
                     </figcaption>
                 </figure>
-                <figure style="margin: 0; border: 1px solid rgba(212,175,55,0.25); border-radius: 12px; padding: 20px; background: rgba(255,255,255,0.03);">
-                    <img src="images/instrument-panel/ip-freedom-score.webp" alt="Sample client dashboard, fully illustrative — the Freedom Score: systems installed measured, not market outcomes" loading="lazy" style="width: 100%; border-radius: 8px; margin-bottom: 16px; display: block;">
+                <figure class="ip-card" role="button" tabindex="0" data-caption="The Freedom Score — sample client, illustrative">
+                    <div class="ip-card__frame">
+                        <img src="images/instrument-panel/ip-freedom-score.webp" alt="Sample client dashboard, fully illustrative — the Freedom Score: systems installed measured, not market outcomes" decoding="async" width="1920" height="1080">
+                        <span class="ip-card__hint">⤢ Click to enlarge</span>
+                    </div>
                     <figcaption>
                         <strong>The Freedom Score.</strong> A score that measures systems installed, not market outcomes. Markets aren't yours to control. Systems are.
                     </figcaption>
                 </figure>
-                <figure style="margin: 0; border: 1px solid rgba(212,175,55,0.25); border-radius: 12px; padding: 20px; background: rgba(255,255,255,0.03);">
-                    <img src="images/instrument-panel/ip-accountability.webp" alt="Sample client dashboard, fully illustrative — the accountability screen: dead-man switch armed, kill criteria locked, external verifier status" loading="lazy" style="width: 100%; border-radius: 8px; margin-bottom: 16px; display: block;">
+                <figure class="ip-card" role="button" tabindex="0" data-caption="The Accountability Screen — sample client, illustrative">
+                    <div class="ip-card__frame">
+                        <img src="images/instrument-panel/ip-accountability.webp" alt="Sample client dashboard, fully illustrative — the accountability screen: dead-man switch armed, kill criteria locked, external verifier status" decoding="async" width="1920" height="1080">
+                        <span class="ip-card__hint">⤢ Click to enlarge</span>
+                    </div>
                     <figcaption>
                         <strong>The Accountability Screen.</strong> A dead-man switch if priorities go unset. Kill criteria drafted, committed, and locked. An external verifier who must approve — and has refused before. The dashboard scores the advisor, not just the portfolio.
                     </figcaption>
@@ -410,6 +441,59 @@
                 </a>
             </div>
         </div>
+
+        <!-- Instrument Panel lightbox (self-contained; stamped image travels into the zoom) -->
+        <div class="ip-lightbox" id="ipLightbox" aria-hidden="true">
+            <div class="ip-lightbox__overlay" data-ip-close></div>
+            <div class="ip-lightbox__content">
+                <button class="ip-lightbox__close" type="button" aria-label="Close" data-ip-close>&times;</button>
+                <img class="ip-lightbox__img" src="" alt="">
+                <p class="ip-lightbox__cap"></p>
+            </div>
+        </div>
+
+        <script>
+        (function () {
+            function init() {
+                var section = document.getElementById('instrument-panel');
+                var lb = document.getElementById('ipLightbox');
+                if (!section || !lb) return;
+                var lbImg = lb.querySelector('.ip-lightbox__img');
+                var lbCap = lb.querySelector('.ip-lightbox__cap');
+                function open(src, cap) {
+                    lbImg.setAttribute('src', src);
+                    lbImg.setAttribute('alt', cap);
+                    lbCap.textContent = cap;
+                    lb.classList.add('active');
+                    lb.setAttribute('aria-hidden', 'false');
+                    document.body.style.overflow = 'hidden';
+                }
+                function close() {
+                    lb.classList.remove('active');
+                    lb.setAttribute('aria-hidden', 'true');
+                    document.body.style.overflow = '';
+                    lbImg.setAttribute('src', '');
+                }
+                section.querySelectorAll('.ip-card').forEach(function (card) {
+                    var img = card.querySelector('img');
+                    var cap = card.getAttribute('data-caption') || (img ? img.alt : '');
+                    function activate() { open(img.currentSrc || img.src, cap); }
+                    card.addEventListener('click', activate);
+                    card.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
+                    });
+                });
+                lb.querySelectorAll('[data-ip-close]').forEach(function (el) {
+                    el.addEventListener('click', close);
+                });
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && lb.classList.contains('active')) close();
+                });
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+            else init();
+        })();
+        </script>
     </section>
 
     <!-- Transition Connector: Operationalization → Framework -->
