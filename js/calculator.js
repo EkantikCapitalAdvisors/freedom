@@ -86,6 +86,12 @@ function setupInputListeners() {
         input.addEventListener('blur', validateInputs);
     });
 
+    // Auto-scale the death benefit with the annual funding level. The multiple
+    // (~30× annual premium) is taken from the cited MassMutual illustration
+    // ($50K/yr → ~$1.5M initial death benefit). The user can still override by
+    // typing their own figure; once they do, we stop auto-scaling until reload.
+    setupDeathBenefitAutoScale();
+
     // Live recalculation: once results are visible, recompute as the user
     // changes any assumption (growth rates, contributions, etc.) instead of
     // requiring another "Calculate" click. Debounced so slider/typing is smooth.
@@ -108,6 +114,34 @@ function setupInputListeners() {
             el.addEventListener('input', liveRecalc);
             el.addEventListener('change', liveRecalc);
         }
+    });
+}
+
+// ~30× the annual premium, from the cited MassMutual illustration
+// ($50K/yr → ~$1.5M initial death benefit). Rounded to the field's $10K step.
+const DEATH_BENEFIT_FUNDING_MULTIPLE = 30;
+
+function setupDeathBenefitAutoScale() {
+    const fundingInput = document.getElementById('annualContribution');
+    const dbInput = document.getElementById('deathBenefit');
+    if (!fundingInput || !dbInput) return;
+
+    let manuallyOverridden = false;
+
+    const scaledDeathBenefit = () => {
+        const funding = parseFloat(fundingInput.value) || 0;
+        return Math.round(funding * DEATH_BENEFIT_FUNDING_MULTIPLE / 10000) * 10000;
+    };
+
+    // Seed the field from the current funding on load.
+    dbInput.value = scaledDeathBenefit();
+
+    // A real user edit (not a programmatic .value set) stops auto-scaling.
+    dbInput.addEventListener('input', () => { manuallyOverridden = true; });
+
+    // Funding changes recompute the death benefit unless the user overrode it.
+    fundingInput.addEventListener('input', () => {
+        if (!manuallyOverridden) dbInput.value = scaledDeathBenefit();
     });
 }
 
@@ -201,7 +235,7 @@ function gatherInputs() {
         cvGrowthRate: parseFloat(safeGetValue('cvGrowthRate', '4')) || 4,
         borrowPercent: parseFloat(safeGetValue('borrowPercent', '90')) || 90,
         loanRate: parseFloat(safeGetValue('loanRate', '6')) || 6,
-        deathBenefit: parseFloat(safeGetValue('deathBenefit', '750000')) || 750000
+        deathBenefit: parseFloat(safeGetValue('deathBenefit', '1500000')) || 1500000
     };
 }
 
@@ -1280,7 +1314,7 @@ function resetToDefaults() {
     document.getElementById('loanRate').value = 6;
     document.getElementById('epigCAGR').value = 26;
     document.getElementById('interestHandling').value = 'paid';
-    document.getElementById('deathBenefit').value = 750000;
+    document.getElementById('deathBenefit').value = 1500000;
     document.getElementById('reduceDB').checked = true;
     
     // Clear warnings
