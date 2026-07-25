@@ -193,7 +193,7 @@ function gatherInputs() {
         contributionTiming: contributionTiming,
         
         // Plan 1
-        directCAGR: parseFloat(safeGetValue('directCAGR', '12')) || 12,
+        directCAGR: parseFloat(safeGetValue('directCAGR', '17')) || 17,
         taxRate: taxRate,
         perpetualRate: parseFloat(safeGetValue('perpetualRate', '7')) || 7,
         
