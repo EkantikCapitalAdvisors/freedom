@@ -1268,6 +1268,14 @@
                                         <div class="metric-value" id="plan1Legacy">$0</div>
                                     </div>
 
+                                    <div class="metric-row optionality-row">
+                                        <div class="metric-label">
+                                            <i class="fas fa-hand-holding-dollar"></i> Net Available Outside
+                                            <span class="label-note">(full lump sum — take it liquid instead of annuitizing)</span>
+                                        </div>
+                                        <div class="metric-value" id="plan1NetAvailable">$0</div>
+                                    </div>
+
                                     <div class="metric-details">
                                         <div class="detail-item">
                                             <span>After-tax capital (total):</span>
@@ -1315,6 +1323,14 @@
                                         <div class="metric-value" id="plan2Legacy">$0</div>
                                     </div>
 
+                                    <div class="metric-row optionality-row">
+                                        <div class="metric-label">
+                                            <i class="fas fa-hand-holding-dollar"></i> Net Available Outside
+                                            <span class="label-note">(Net EPIG lump sum — cash value stays inside the policy)</span>
+                                        </div>
+                                        <div class="metric-value" id="plan2NetAvailable">$0</div>
+                                    </div>
+
                                     <div class="metric-details">
                                         <div class="detail-item">
                                             <span>Policy cash value (inside):</span>
@@ -1344,6 +1360,30 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Optionality visual: where the capital sits + annuitize-vs-lump-sum -->
+                        <style>
+                            .optionality-row .metric-value { color: var(--gold, #C8A951); }
+                            .opt-panel { margin-top: 28px; border: 1px solid rgba(212,175,55,0.22); border-radius: 14px; padding: 24px; background: rgba(255,255,255,0.02); }
+                            .opt-panel__title { font-size: 18px; font-weight: 700; margin: 0 0 6px; color: #E9E7E2; }
+                            .opt-panel__sub { font-size: 13.5px; color: #9fb0c9; margin: 0 0 20px; line-height: 1.55; }
+                            .opt-plan { margin-bottom: 22px; }
+                            .opt-plan:last-of-type { margin-bottom: 0; }
+                            .opt-plan__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+                            .opt-plan__name { font-weight: 700; font-size: 14.5px; }
+                            .opt-plan__total { font-size: 13px; color: #9fb0c9; }
+                            .opt-bar { display: flex; width: 100%; height: 40px; border-radius: 8px; overflow: hidden; background: rgba(255,255,255,0.04); }
+                            .opt-seg { display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 600; color: #0a0f1e; white-space: nowrap; overflow: hidden; min-width: 0; padding: 0 6px; }
+                            .opt-seg.seg-annuitize { background: linear-gradient(135deg, #C8A951, #E0C56E); }
+                            .opt-seg.seg-liquid { background: linear-gradient(135deg, #2FB6A8, #57ccc0); }
+                            .opt-seg.seg-inside { background: linear-gradient(135deg, #6a8fc0, #8fb0da); }
+                            .opt-legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: #b9c6da; }
+                            .opt-legend span { display: inline-flex; align-items: center; gap: 6px; }
+                            .opt-dot { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+                            .opt-note { margin-top: 18px; font-size: 12.5px; color: #9fb0c9; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 14px; }
+                            @media (max-width: 560px) { .opt-seg { font-size: 10px; } }
+                        </style>
+                        <div id="optionalityPanel"></div>
 
                         <!-- Charts (Hidden - Keep Display Simple) -->
                         <div class="charts-section" style="display: none;">

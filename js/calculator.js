@@ -729,6 +729,75 @@ function setupTableButtons() {
 }
 
 // ===================================
+// OPTIONALITY VISUAL
+// ===================================
+// Shows where each plan's capital sits at the end of the funding period and
+// makes the annuitize-vs-lump-sum choice explicit. Bars are scaled to a common
+// maximum so plan totals are visually comparable.
+
+function generateOptionalityVisual(plan1, plan2) {
+    const container = document.getElementById('optionalityPanel');
+    if (!container) return;
+
+    const p1Annuitized = plan1.annuitizedAmount || 0;   // 70% (income)
+    const p1Liquid = plan1.liquidity || 0;              // 30% (available)
+    const p1Total = p1Annuitized + p1Liquid;
+
+    const p2NetEPIG = plan2.netEPIGAfterLoanPayoff || 0; // outside the policy (annuitized)
+    const p2CV = plan2.effectiveCashValue || 0;         // inside the policy
+    const p2Total = p2NetEPIG + p2CV;
+    const p2DB = plan2.netDeathBenefit || 0;
+
+    const maxTotal = Math.max(p1Total, p2Total, 1);
+    const pct = (v) => (v / maxTotal) * 100;
+    const share = (v, total) => total > 0 ? (v / total) * 100 : 0;
+    const fmt = (v) => formatCurrency(v);
+
+    const seg = (cls, amount, total, label) =>
+        `<div class="opt-seg ${cls}" style="flex-basis:${share(amount, total)}%" title="${label}: ${fmt(amount)}">${fmt(amount)}</div>`;
+
+    const html = `
+        <div class="opt-panel">
+            <p class="opt-panel__title"><i class="fas fa-scale-balanced" style="color:var(--gold,#C8A951);margin-right:8px;"></i>Where Your Capital Sits — and Your Options</p>
+            <p class="opt-panel__sub">At the end of the funding period this is the capital each plan puts in your hands. You can <strong>annuitize</strong> it for the perpetual income shown above, or keep it as a <strong>lump sum</strong> to deploy yourself — your choice.</p>
+
+            <div class="opt-plan">
+                <div class="opt-plan__head">
+                    <span class="opt-plan__name">Plan 1: Direct Invest</span>
+                    <span class="opt-plan__total">${fmt(p1Total)} available outside</span>
+                </div>
+                <div class="opt-bar" style="width:${pct(p1Total)}%">
+                    ${seg('seg-annuitize', p1Annuitized, p1Total, 'Annuitized for income')}
+                    ${seg('seg-liquid', p1Liquid, p1Total, 'Liquid / available')}
+                </div>
+            </div>
+
+            <div class="opt-plan">
+                <div class="opt-plan__head">
+                    <span class="opt-plan__name">Plan 2: Whole Life + EPIG</span>
+                    <span class="opt-plan__total">${fmt(p2Total)} accessible${p2DB > 0 ? ` &nbsp;·&nbsp; + ${fmt(p2DB)} death benefit` : ''}</span>
+                </div>
+                <div class="opt-bar" style="width:${pct(p2Total)}%">
+                    ${seg('seg-annuitize', p2NetEPIG, p2Total, 'Net EPIG outside (annuitized)')}
+                    ${seg('seg-inside', p2CV, p2Total, 'Cash value inside policy')}
+                </div>
+            </div>
+
+            <div class="opt-legend">
+                <span><span class="opt-dot" style="background:#C8A951"></span> Annuitized for income (the perpetual income above)</span>
+                <span><span class="opt-dot" style="background:#2FB6A8"></span> Liquid / available lump sum</span>
+                <span><span class="opt-dot" style="background:#6a8fc0"></span> Inside the policy (tax-free cash value)</span>
+            </div>
+
+            <p class="opt-note"><strong>The optionality:</strong> the gold portion is what produces the perpetual income if you annuitize — but you're never forced to. Plan 1 can be kept entirely liquid (${fmt(p1Total)}). Plan 2 keeps ${fmt(p2CV)} of tax-free cash value inside the policy plus ${fmt(p2NetEPIG)} outside${p2DB > 0 ? `, and still carries a ${fmt(p2DB)} death benefit to heirs` : ''}. Annuitizing is a one-way choice; a lump sum keeps flexibility. Figures are at the end of the funding period.</p>
+        </div>
+    `;
+
+    container.innerHTML = html;
+    container.style.display = 'block';
+}
+
+// ===================================
 // DISPLAY RESULTS
 // ===================================
 
@@ -779,6 +848,7 @@ function displayResults(plan1, plan2) {
     setText('plan1Income', plan1.perpetualIncome);
     setText('plan1Liquidity', plan1.liquidity);
     setText('plan1Legacy', plan1LegacyAtDeath);
+    setText('plan1NetAvailable', plan1.afterTaxCapital); // full lump sum if not annuitized
     setText('plan1AfterTax', plan1.afterTaxCapital);
     setText('plan1Annuitized', plan1.annuitizedAmount);
     setText('plan1Contributed', plan1.totalContributed);
@@ -787,12 +857,18 @@ function displayResults(plan1, plan2) {
     setText('plan2Income', plan2.perpetualIncome);
     setText('plan2Liquidity', plan2.totalLiquidity);
     setText('plan2Legacy', plan2LegacyAtDeath);
+    setText('plan2NetAvailable', plan2.netEPIGAfterLoanPayoff); // Net EPIG outside the policy
     setText('plan2CashValue', plan2.cashValue);
     setText('plan2EPIG', plan2.netEPIGAfterLoanPayoff);
     setText('plan2Interest', plan2.cumulativeInterest);
     setText('plan2TaxOnGains', plan2.taxOnEPIGGains);
     setText('plan2GrossDB', plan2.grossDeathBenefit);
     setText('plan2Premiums', plan2.totalPremiumsPaid);
+
+    // Optionality visual — where each plan's capital sits, and the
+    // annuitize-vs-lump-sum choice.
+    try { generateOptionalityVisual(plan1, plan2); }
+    catch (e) { console.warn('Could not render optionality visual:', e); }
     
     // Update component year (safe with null checks)
     try {
