@@ -711,10 +711,40 @@ function displayResults(plan1, plan2) {
         else console.warn(`Result element '${id}' not found — skipped`);
     };
 
+    // Project legacy to a TYPICAL DEATH AGE (~80) rather than showing the
+    // end-of-contribution value (a young age), which understates the legacy.
+    // Plan 1 legacy = liquidity fund grown at the after-tax bond rate.
+    // Plan 2 legacy = death benefit grown via the same DB tiers the long-term
+    // table uses (3.00% / 2.76% / 2.93%).
+    const inp = calculatorState.inputs || {};
+    const contribEndAge = (inp.currentAge || 0) + (inp.timeHorizon || 0);
+    const deathAge = Math.max(80, contribEndAge);
+    const yearsToDeath = Math.max(0, deathAge - contribEndAge);
+    const afterTaxBond = 5 * (1 - (inp.taxRate || 0) / 100);
+    const dbTiers = [3.00, 2.76, 2.93];
+    const cvTiers = [5.48, 5.24, 4.61];
+    const projectTier = (start, n, R) => {
+        if (n <= 0) return start;
+        if (n <= 10) return start * Math.pow(1 + R[0] / 100, n);
+        const a = start * Math.pow(1 + R[0] / 100, 10);
+        if (n <= 20) return a * Math.pow(1 + R[1] / 100, n - 10);
+        return a * Math.pow(1 + R[1] / 100, 10) * Math.pow(1 + R[2] / 100, n - 20);
+    };
+    const plan1LegacyAtDeath = plan1.netLegacy * Math.pow(1 + afterTaxBond / 100, yearsToDeath);
+    // Death benefit INCLUDES cash value (DB = CV + net amount at risk), so the
+    // legacy can never be below the projected cash value — floor it there.
+    const plan2LegacyAtDeath = Math.max(
+        projectTier(plan2.netLegacy, yearsToDeath, dbTiers),
+        projectTier(plan2.effectiveCashValue, yearsToDeath, cvTiers)
+    );
+
+    // Reflect the projection age in the labels (fallback to 80 if markup differs)
+    document.querySelectorAll('.legacy-death-age').forEach(el => { el.textContent = deathAge; });
+
     // Plan 1 Results
     setText('plan1Income', plan1.perpetualIncome);
     setText('plan1Liquidity', plan1.liquidity);
-    setText('plan1Legacy', plan1.netLegacy);
+    setText('plan1Legacy', plan1LegacyAtDeath);
     setText('plan1AfterTax', plan1.afterTaxCapital);
     setText('plan1Annuitized', plan1.annuitizedAmount);
     setText('plan1Contributed', plan1.totalContributed);
@@ -722,7 +752,7 @@ function displayResults(plan1, plan2) {
     // Plan 2 Results
     setText('plan2Income', plan2.perpetualIncome);
     setText('plan2Liquidity', plan2.totalLiquidity);
-    setText('plan2Legacy', plan2.netLegacy);
+    setText('plan2Legacy', plan2LegacyAtDeath);
     setText('plan2CashValue', plan2.cashValue);
     setText('plan2EPIG', plan2.netEPIGAfterLoanPayoff);
     setText('plan2Interest', plan2.cumulativeInterest);
