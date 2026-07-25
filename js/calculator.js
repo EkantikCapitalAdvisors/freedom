@@ -222,7 +222,7 @@ function gatherInputs() {
     
     return {
         currentAge: parseInt(safeGetValue('currentAge', '51')) || 51,
-        timeHorizon: parseInt(safeGetValue('timeHorizon', '10')) || 10,
+        timeHorizon: parseInt(safeGetValue('timeHorizon', '12')) || 12,
         annualContribution: parseFloat(safeGetValue('annualContribution', '50000')) || 50000,
         contributionTiming: contributionTiming,
         
@@ -1378,7 +1378,7 @@ function toggleYearTable() {
 
 function resetToDefaults() {
     document.getElementById('currentAge').value = 51;
-    document.getElementById('timeHorizon').value = 10;
+    document.getElementById('timeHorizon').value = 12;
     document.getElementById('annualFunding').value = 50000;
     document.getElementById('contributionTiming').checked = false;
     document.getElementById('directCAGR').value = 20;
