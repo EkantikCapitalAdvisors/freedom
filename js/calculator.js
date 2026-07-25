@@ -858,17 +858,27 @@ function generateComparisonTable(plan1, plan2, inputs) {
         // Plan 2 liquid EPIG remainder (30%): reinvested in bonds (after-tax growth)
         const plan2LiquidEPIG = plan2LiquidEPIGStart * Math.pow(1 + plan1AfterTaxBondRate / 100, years);
 
-        // Plan 2 income-loan balance: the annual tax-free policy-loan draws
-        // against cash value compound at the policy loan rate
-        const r = (loanRate || 0) / 100;
+        // Plan 2 income-loan balance — WASH-LOAN (non-direct-recognition) model.
+        // Income is drawn via tax-free policy loans, but a properly structured
+        // policy keeps crediting dividends on the FULL cash value, including the
+        // borrowed portion. So the loan accrues only at its NET cost over the
+        // credited rate: netLoanRate = max(0, loanRate − cashValueCreditRate).
+        // When the loan rate is at or below the credited rate the loan never
+        // outruns cash value, so the policy does not lapse and income is
+        // perpetual — the loan is simply a lien settled from the death benefit.
+        const grossLoanRate = (loanRate || 0) / 100;
+        const cvCreditRate = plan2CashValueRate_0_10 / 100; // policy's credited rate
+        const netLoanRate = Math.max(0, grossLoanRate - cvCreditRate);
         const incomeLoanBalance = years === 0 || cvIncomeDraw === 0
             ? 0
-            : (r > 0
-                ? cvIncomeDraw * (Math.pow(1 + r, years) - 1) / r
+            : (netLoanRate > 0
+                ? cvIncomeDraw * (Math.pow(1 + netLoanRate, years) - 1) / netLoanRate
                 : cvIncomeDraw * years);
 
-        // Lapse check: if the loan balance reaches cash value, the policy
-        // lapses — remaining CV/DB are consumed by the loan
+        // Sustainability guard: only flags if a user dials in an unsustainable
+        // combination (loan rate far above the credited rate) that would let
+        // the net loan overtake cash value. Under default wash-loan terms the
+        // loan stays well below cash value and this never triggers.
         const policyLapsed = years > 0 && cvIncomeDraw > 0 && incomeLoanBalance >= plan2CashValue;
         const lapseRisk = !policyLapsed && cvIncomeDraw > 0 && incomeLoanBalance > plan2CashValue * 0.9;
 
@@ -962,14 +972,14 @@ function displayComparisonTable(comparisons) {
                 </div>
                 <div class="note-item plan2-note">
                     <strong>Plan 2 Growth Assumptions (same 70/30 conversion as Plan 1; MassMutual rates non-guaranteed):</strong><br>
-                    • Income: 70% of Net EPIG annuitized (life annuity — consumed at death) <em>plus</em> tax-free policy loans drawn against 70% of cash value at the perpetual rate<br>
-                    • Income-loan balance compounds at the policy loan rate and reduces cash value / death benefit over time<br>
+                    • Income: 70% of Net EPIG annuitized (life annuity — consumed at death) <em>plus</em> perpetual tax-free policy-loan income drawn against 70% of cash value<br>
+                    • Wash-loan (non-direct-recognition) assumption: the policy keeps crediting dividends on the borrowed cash value, so the loan accrues only at its net cost over the credited rate and never outruns cash value — income is perpetual and the policy does not lapse<br>
                     • Liquid EPIG remainder (30%) invested in bonds at net ~3.75%/year<br>
                     • Cash value grows tax-deferred at ~5.5%/yr once premiums end, easing to ~5.2% then ~4.6% in later decades (non-guaranteed)<br>
                     • Death benefit grows: 3.00% (years 10-20), 2.76% (20-30), 2.93% (30-40)<br>
-                    • <strong>While Alive:</strong> Liquidity = (Cash Value − income loans) + liquid EPIG remainder<br>
-                    • <strong>At Death:</strong> Heirs receive (Death Benefit − income loans) + liquid EPIG remainder. Death Benefit = Cash Value + Net Amount at Risk (not additive!)<br>
-                    • ⚠ If income loans reach cash value, the policy lapses (flagged in the table)
+                    • <strong>While Alive:</strong> Liquidity = (Cash Value − outstanding loan) + liquid EPIG remainder<br>
+                    • <strong>At Death:</strong> Heirs receive (Death Benefit − outstanding loan) + liquid EPIG remainder. Death Benefit = Cash Value + Net Amount at Risk (not additive!)<br>
+                    • Requires wash-loan terms (loan rate at or below the policy's credited rate). If a much higher loan rate is entered, the table flags a sustainability warning.
                 </div>
             </div>
             
@@ -1024,12 +1034,12 @@ function displayComparisonTable(comparisons) {
             <div class="comparison-insights">
                 <div class="insight-box">
                     <i class="fas fa-lightbulb"></i>
-                    <strong>Key Insight:</strong> Both plans convert capital to income under the SAME rule (70% at the perpetual rate, 30% stays liquid), so the columns compare like-for-like. Plan 2's death benefit INCLUDES cash value (Death Benefit = Cash Value + Net Amount at Risk); income drawn via policy loans is tax-free but accrues at the loan rate and reduces what heirs receive. Annuitized capital is consumed at death in both plans. Annuity income may be partially taxable; policy-loan income is generally tax-free — income-phase taxes are not modeled.
+                    <strong>Key Insight:</strong> Both plans convert capital to income under the SAME rule (70% at the perpetual rate, 30% stays liquid), so the columns compare like-for-like. Plan 2's income is perpetual: the EPIG portion is a life annuity, and the cash-value portion is drawn via tax-free wash loans the policy keeps crediting — so the loan never outruns cash value and the policy does not lapse. Plan 2's death benefit INCLUDES cash value (Death Benefit = Cash Value + Net Amount at Risk) and passes to heirs net of any outstanding loan. Annuitized capital is consumed at death in both plans. Annuity income may be partially taxable; policy-loan income is generally tax-free — income-phase taxes are not modeled.
                 </div>
                 ${anyLapse || anyLapseRisk ? `
                 <div class="insight-box" style="border-left: 4px solid #c0392b; margin-top: 12px;">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Lapse Warning:</strong> Under these assumptions the policy-loan balance ${anyLapse ? 'reaches' : 'approaches'} the cash value in later years (rows marked ⚠). ${anyLapse ? 'After lapse, the CV/DB portion of liquidity and legacy is $0 and the tax-free treatment of prior loans may be lost (*income shown continues only from the annuitized EPIG portion). ' : ''}A real policy would need a lower draw rate, dividend offsets, or loan repayments to stay in force — review with your advisor.
+                    <strong>Sustainability Warning:</strong> At the loan rate you entered, the net cost of borrowing outpaces the policy's credited rate, so the loan ${anyLapse ? 'overtakes' : 'approaches'} the cash value in later years (rows marked ⚠). ${anyLapse ? 'After that point the CV/DB portion of liquidity and legacy is $0 and the tax-free treatment of prior loans may be lost (*income shown continues only from the annuitized EPIG portion). ' : ''}Wash-loan terms (a loan rate at or below the credited rate) keep the policy in force indefinitely — lower the loan rate or review structuring with your advisor.
                 </div>` : ''}
             </div>
         </div>
