@@ -394,10 +394,13 @@ function calculatePlan1(inputs) {
         });
     }
     
-    // Calculate gains and tax
+    // Calculate gains and tax. Only positive gains are taxed — without the
+    // floor a loss produced a NEGATIVE tax, i.e. a refund that inflated the
+    // portfolio above its actual value (reachable via a shared URL parameter,
+    // which bypasses the input's min=0). Plan 2 already guards this the same way.
     const totalContributed = annualContribution * timeHorizon;
     const gains = portfolioValue - totalContributed;
-    const taxOnGains = gains * (taxRate / 100);
+    const taxOnGains = Math.max(0, gains) * (taxRate / 100);
     const afterTaxCapital = portfolioValue - taxOnGains;
     
     // 70/30 split: 70% annuitized, 30% remains liquid
@@ -451,11 +454,18 @@ function calculatePlan2(inputs) {
     // account; the exposure above it is carried on margin (futures/portfolio
     // margin — EPIG trades SPY and S&P 500 futures). Margin amplifies the
     // return ON EQUITY rather than creating a debt to repay, so the account
-    // compounds at CAGR x leverage. Modelling it the other way (contributing
-    // the full exposure at the unlevered CAGR) would conjure the margin
-    // portion out of nothing and overstate the result.
-    const epigLeverage = borrowPercent > 0 ? (epigExposurePercent / borrowPercent) : 1;
-    const epigGrowthRate = directCAGR * epigLeverage;
+    // compounds at a levered rate.
+    //
+    // Leverage is NOT free: the borrowed slice carries a financing cost, so
+    // the levered return is  L x CAGR − (L − 1) x financingRate,  not simply
+    // L x CAGR. Without that term, borrowing LESS produced MORE income
+    // (borrow 10% => 170%/yr), which is money from nothing. The policy loan
+    // rate is used as the financing proxy rather than adding another input.
+    // Leverage is also capped: the raw ratio is UI-reachable up to 200/1 = 200x.
+    const MAX_EPIG_LEVERAGE = 2;
+    const rawLeverage = borrowPercent > 0 ? (epigExposurePercent / borrowPercent) : 1;
+    const epigLeverage = Math.min(MAX_EPIG_LEVERAGE, Math.max(0, rawLeverage));
+    const epigGrowthRate = epigLeverage * directCAGR - (epigLeverage - 1) * loanRate;
     
     let cashValue = 0;
     let epigValue = 0;
@@ -480,15 +490,25 @@ function calculatePlan2(inputs) {
         // the policy loan and the equity in the EPIG account.
         const borrowAmount = premium * (borrowPercent / 100);
 
-        // Policy loan capitalizes interest, paid back at the end from EPIG.
-        // WASH-LOAN (non-direct-recognition): the borrowed cash value keeps
-        // earning the policy's credited rate, so the loan's NET cost is
-        // (loan rate − cash value growth rate). With loan 6% and CV 4% the net
-        // drag is ~2%, not the full 6%.
-        const netLoanRate = Math.max(0, (loanRate - cvGrowthRate) / 100);
-        const interestPayment = loanBalance * netLoanRate;
-        cumulativeInterest += interestPayment;
-        loanBalance = loanBalance * (1 + netLoanRate) + borrowAmount;
+        // Policy loan capitalizes interest, repaid at the end from EPIG.
+        //
+        // The loan accrues at the FULL contractual rate. The wash-loan
+        // (non-direct-recognition) benefit is already captured above, where
+        // cashValue compounds on the entire balance INCLUDING the borrowed
+        // portion. Charging the loan a "net of cash value growth" rate as well
+        // would credit cvGrowthRate twice on the same dollars — that bug made
+        // ~$156K of debt disappear at the default inputs and overstated income
+        // by 17%. The wash benefit now emerges naturally as the CV/loan spread.
+        const annualLoanRate = loanRate / 100;
+        const interestAccrued = loanBalance * annualLoanRate;
+        cumulativeInterest += interestAccrued;
+        const interestPayment = interestAccrued; // retained for the year table
+        if (contributionTiming === 'start') {
+            // Borrowed at the start of the year, so it accrues for the year too
+            loanBalance = (loanBalance + borrowAmount) * (1 + annualLoanRate);
+        } else {
+            loanBalance = loanBalance * (1 + annualLoanRate) + borrowAmount;
+        }
 
         // EPIG account equity compounds at the leveraged rate (interest is not
         // skimmed off; the policy loan is settled at the end from EPIG).
@@ -547,8 +567,14 @@ function calculatePlan2(inputs) {
 
     // Legacy at death = the death benefit (which already INCLUDES cash value).
     // Loans were repaid during accumulation, so nothing is deducted here.
-    const grossDeathBenefit = deathBenefit;
-    const netDeathBenefit = Math.max(0, deathBenefit - cvShortfall);
+    // The death benefit ALWAYS contains the cash value (corridor rule). The
+    // entered death benefit is a fixed number while cash value compounds, so on
+    // long horizons the input can fall below the cash value — impossible in a
+    // real policy, where the corridor and paid-up additions force the death
+    // benefit up. Floor it, otherwise the scorecard contradicts itself
+    // (e.g. liquidity $2.8M displayed against a $1.5M death benefit).
+    const grossDeathBenefit = Math.max(deathBenefit, cashValue);
+    const netDeathBenefit = Math.max(effectiveCashValue, grossDeathBenefit - cvShortfall);
     const netLegacy = netDeathBenefit;
 
     return {
@@ -928,7 +954,10 @@ function displayResults(plan1, plan2) {
     setText('plan2Liquidity', plan2.totalLiquidity);
     setText('plan2Legacy', plan2LegacyAtDeath);
     setText('plan2NetAvailable', plan2.netEPIGAfterLoanPayoff); // Net EPIG outside the policy
-    setText('plan2CashValue', plan2.cashValue);
+    // Use the effective cash value — the same figure Liquidity, the death
+    // benefit and the optionality visual use. Showing gross here contradicted
+    // the Liquidity row whenever EPIG fell short of repaying the loan.
+    setText('plan2CashValue', plan2.effectiveCashValue);
     setText('plan2EPIG', plan2.netEPIGAfterLoanPayoff);
     setText('plan2Interest', plan2.cumulativeInterest);
     setText('plan2TaxOnGains', plan2.taxOnEPIGGains);
@@ -1134,8 +1163,9 @@ function displayComparisonTable(comparisons, rates) {
                 <div class="note-item plan2-note">
                     <strong>Plan 2 Growth Assumptions (MassMutual rates non-guaranteed):</strong><br>
                     • Accumulation: premiums build tax-free cash value; loans are taken against it and invested in EPIG. EPIG compounds; the loan (principal + interest) is repaid from the EPIG proceeds<br>
-                    • Wash loan: the borrowed cash value keeps earning the credited rate, so the loan's net cost is (loan rate − cash-value rate). Loan interest is treated as deductible against the EPIG gain<br>
-                    • Leverage: EPIG exposure above the borrowed amount is carried on margin, so the account compounds at (growth rate × exposure ÷ borrow %). Leverage amplifies losses as well as gains — set EPIG Exposure % equal to Borrow % for an unlevered view<br>
+                    • Wash loan: the loan accrues at the full policy loan rate, while the cash value keeps earning the credited rate on the borrowed portion too — so the net drag is the spread between them, not the full loan rate<br>
+                    • Leverage: EPIG exposure above the borrowed amount is carried on margin, so the account compounds at (leverage × growth rate) less the financing cost on the borrowed slice, capped at 2× leverage. Leverage amplifies losses as well as gains — set EPIG Exposure % equal to Borrow % for an unlevered view<br>
+                    • Loan interest is treated as deductible against the EPIG gain — confirm this with your tax advisor, as interest incurred to carry life insurance is often restricted<br>
                     • Income: 100% of the Net EPIG that remains outside the policy is annuitized at the perpetual rate — a life annuity that pays for life and <strong>never lapses</strong><br>
                     • The cash value is never annuitized or borrowed against for income — it stays inside the policy as tax-free liquidity and the death benefit<br>
                     • Cash value grows tax-deferred at ~5.5%/yr once premiums end, easing to ~5.2% then ~4.6% in later decades (non-guaranteed)<br>
