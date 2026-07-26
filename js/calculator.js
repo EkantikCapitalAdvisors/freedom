@@ -749,6 +749,41 @@ function setupTableButtons() {
 }
 
 // ===================================
+// POLICY PROJECTION HELPERS
+// ===================================
+// Whole life endows around age 100: the death benefit converges down to the
+// cash value as the net amount at risk (the pure insurance layer) runs off.
+const ENDOWMENT_AGE = 100;
+
+// Cash value growth, from the MassMutual illustration (post-premium tiers).
+const CV_TIERS = [5.48, 5.24, 4.61];
+
+function projectTiered(start, years, tiers) {
+    if (years <= 0) return start;
+    if (years <= 10) return start * Math.pow(1 + tiers[0] / 100, years);
+    const at10 = start * Math.pow(1 + tiers[0] / 100, 10);
+    if (years <= 20) return at10 * Math.pow(1 + tiers[1] / 100, years - 10);
+    const at20 = at10 * Math.pow(1 + tiers[1] / 100, 10);
+    return at20 * Math.pow(1 + tiers[2] / 100, years - 20);
+}
+
+/**
+ * Death benefit = cash value + net amount at risk.
+ *
+ * Growing the death benefit on its own compound rate is wrong: cash value
+ * compounds faster (~5.5% vs ~3%), so the two curves cross and the death
+ * benefit would fall BELOW the cash value — impossible, since DB always
+ * contains CV. The illustration shows the real structure: DB stays above CV
+ * by the net amount at risk, which shrinks as the policy approaches
+ * endowment (age 80 DB/CV ~1.49 -> age 95 ~1.18 -> age 100 ~1.00).
+ */
+function projectDeathBenefit(cashValueAtYear, narAtStart, ageAtYear, startAge) {
+    const yearsToEndowment = Math.max(1, ENDOWMENT_AGE - startAge);
+    const remaining = Math.max(0, (ENDOWMENT_AGE - ageAtYear) / yearsToEndowment);
+    return cashValueAtYear + Math.max(0, narAtStart) * remaining;
+}
+
+// ===================================
 // OPTIONALITY VISUAL
 // ===================================
 // Shows where each plan's capital sits at the end of the funding period and
@@ -844,25 +879,19 @@ function displayResults(plan1, plan2) {
     const deathAge = Math.max(80, contribEndAge);
     const yearsToDeath = Math.max(0, deathAge - contribEndAge);
     const afterTaxBond = 5 * (1 - (inp.taxRate || 0) / 100);
-    const dbTiers = [3.00, 2.76, 2.93];
-    const cvTiers = [5.48, 5.24, 4.61];
-    const projectTier = (start, n, R) => {
-        if (n <= 0) return start;
-        if (n <= 10) return start * Math.pow(1 + R[0] / 100, n);
-        const a = start * Math.pow(1 + R[0] / 100, 10);
-        if (n <= 20) return a * Math.pow(1 + R[1] / 100, n - 10);
-        return a * Math.pow(1 + R[1] / 100, 10) * Math.pow(1 + R[2] / 100, n - 20);
-    };
     const plan1LegacyAtDeath = plan1.netLegacy * Math.pow(1 + afterTaxBond / 100, yearsToDeath);
-    // Death benefit INCLUDES cash value (DB = CV + net amount at risk), so the
-    // legacy can never be below the projected cash value — floor it there.
-    const plan2LegacyAtDeath = Math.max(
-        projectTier(plan2.netLegacy, yearsToDeath, dbTiers),
-        projectTier(plan2.effectiveCashValue, yearsToDeath, cvTiers)
-    );
+    // Death benefit = projected cash value + the net amount at risk remaining
+    // at that age (see projectDeathBenefit). Keeps DB above CV, as it must be.
+    const narAtStart = Math.max(0, (plan2.netDeathBenefit || 0) - (plan2.effectiveCashValue || 0));
+    const plan2CashValueAtDeath = projectTiered(plan2.effectiveCashValue, yearsToDeath, CV_TIERS);
+    const plan2LegacyAtDeath = projectDeathBenefit(plan2CashValueAtDeath, narAtStart, deathAge, contribEndAge);
 
     // Reflect the projection age in the labels (fallback to 80 if markup differs)
     document.querySelectorAll('.legacy-death-age').forEach(el => { el.textContent = deathAge; });
+    // Show the actual after-tax rate the Plan 1 liquidity fund compounds at
+    document.querySelectorAll('.plan1-liquidity-rate').forEach(el => {
+        el.textContent = Math.round(afterTaxBond * 100) / 100;
+    });
 
     // Plan 1 Results
     setText('plan1Income', plan1.perpetualIncome);
@@ -962,14 +991,18 @@ function generateComparisonTable(plan1, plan2, inputs) {
     // Prior value here was 6.88% (illustration yrs 10-20), but that window still included 2
     // premium-paying years, so it over-counted growth. The true post-premium rate (illustration
     // yr 12 -> yr 22: $738,631 -> $1,259,480) is ~5.48%.
-    const plan2CashValueRate_0_10 = 5.48;   // Proj yrs 0-10 (first decade after premiums end): ~5.5% post-premium internal growth
-    const plan2CashValueRate_10_20 = 5.24;  // Proj yrs 10-20: 5.24% CAGR (illustration yrs ~22-32, post-premium)
-    const plan2CashValueRate_20_plus = 4.61; // Proj yrs 20+: 4.61% CAGR (illustration yrs ~32-42, post-premium)
-    
-    const plan2DeathBenefitRate_0_10 = 3.00;  // Years 10-20: 3.00% CAGR (from real data)
-    const plan2DeathBenefitRate_10_20 = 2.76; // Years 20-30: 2.76% CAGR (from real data)
-    const plan2DeathBenefitRate_20_plus = 2.93; // Years 30-40: 2.93% CAGR (from real data)
-    
+    const plan2CashValueRate_0_10 = CV_TIERS[0];   // Proj yrs 0-10 (first decade after premiums end): ~5.5% post-premium internal growth
+    const plan2CashValueRate_10_20 = CV_TIERS[1];  // Proj yrs 10-20: 5.24% CAGR (illustration yrs ~22-32, post-premium)
+    const plan2CashValueRate_20_plus = CV_TIERS[2]; // Proj yrs 20+: 4.61% CAGR (illustration yrs ~32-42, post-premium)
+
+    // Death benefit is modelled as cash value + net amount at risk, NOT as its
+    // own compound rate. Compounding DB independently (~3%) against a faster
+    // cash value (~5.5%) made the curves cross, so the death benefit fell below
+    // the cash value and the Legacy column collapsed onto Liquidity. The
+    // illustration keeps DB above CV, converging only at endowment.
+    const plan2NetAmountAtRisk = Math.max(0, plan2DeathBenefitStart - plan2CashValueStart);
+    const contributionEndAge = currentAge + timeHorizon;
+
     // Project to years 0, 10, 20, 30, 40 from END of contribution period
     // Year 0 = end of contribution period, Year 10 = 10 years after contributions end
     const projectionYears = [0, 10, 20, 30, 40];
@@ -1008,29 +1041,13 @@ function generateComparisonTable(plan1, plan2, inputs) {
         // lapse. The cash value simply keeps compounding tax-free.
         const plan2LiquidityAlive = plan2CashValue;
 
-        // Plan 2 Death Benefit: Multi-tier growth (based on MassMutual illustration)
-        let plan2DeathBenefit;
-        if (years === 0) {
-            plan2DeathBenefit = plan2DeathBenefitStart;
-        } else if (years <= 10) {
-            // Years 0-10: Higher growth
-            plan2DeathBenefit = plan2DeathBenefitStart * Math.pow(1 + plan2DeathBenefitRate_0_10 / 100, years);
-        } else if (years <= 20) {
-            // Years 10-20: Moderate growth
-            const valueAt10 = plan2DeathBenefitStart * Math.pow(1 + plan2DeathBenefitRate_0_10 / 100, 10);
-            plan2DeathBenefit = valueAt10 * Math.pow(1 + plan2DeathBenefitRate_10_20 / 100, years - 10);
-        } else {
-            // Years 20+: Lower growth
-            const valueAt10 = plan2DeathBenefitStart * Math.pow(1 + plan2DeathBenefitRate_0_10 / 100, 10);
-            const valueAt20 = valueAt10 * Math.pow(1 + plan2DeathBenefitRate_10_20 / 100, 10);
-            plan2DeathBenefit = valueAt20 * Math.pow(1 + plan2DeathBenefitRate_20_plus / 100, years - 20);
-        }
-        
-        // Death Benefit already INCLUDES cash value (DB = CV + Net Amount at
-        // Risk), so it can never be less than CV. Accumulation-phase loans were
-        // already repaid from EPIG, so nothing is deducted here — heirs receive
-        // the full death benefit.
-        const plan2LegacyAtDeath = Math.max(plan2DeathBenefit, plan2CashValue);
+        // Plan 2 Death Benefit = cash value + the net amount at risk still in
+        // force at that age. Accumulation-phase loans were already repaid from
+        // EPIG, so nothing is deducted — heirs receive the full death benefit.
+        const plan2DeathBenefit = projectDeathBenefit(
+            plan2CashValue, plan2NetAmountAtRisk, ageAtYear, contributionEndAge
+        );
+        const plan2LegacyAtDeath = plan2DeathBenefit;
 
         comparisons.push({
             year: totalYears,
@@ -1047,10 +1064,20 @@ function generateComparisonTable(plan1, plan2, inputs) {
     });
     
     // Display the comparison table
-    displayComparisonTable(comparisons);
+    displayComparisonTable(comparisons, {
+        bondRate: plan1BondRate,
+        taxRate: taxRate,
+        afterTaxBondRate: plan1BondRate * (1 - taxRate / 100)
+    });
 }
 
-function displayComparisonTable(comparisons) {
+function displayComparisonTable(comparisons, rates) {
+    const bondRate = rates && rates.bondRate !== undefined ? rates.bondRate : 5;
+    const rateTaxRate = rates && rates.taxRate !== undefined ? rates.taxRate : 25;
+    const afterTaxBondRate = rates && rates.afterTaxBondRate !== undefined
+        ? rates.afterTaxBondRate
+        : bondRate * (1 - rateTaxRate / 100);
+    const fmtPct = (v) => `${(Math.round(v * 100) / 100)}%`;
     const container = document.getElementById('comparisonTableContainer');
     if (!container) {
         console.warn('Comparison table container not found');
@@ -1080,8 +1107,8 @@ function displayComparisonTable(comparisons) {
                     <strong>Plan 1 Growth Assumptions:</strong><br>
                     • Income: 70% of after-tax capital annuitized at the perpetual rate (life annuity — consumed at death)<br>
                     • Perpetual income continues unchanged (not inflation-adjusted)<br>
-                    • Liquidity fund (30%) invested in bonds at 5%, taxed annually → net ~3.75%/year<br>
-                    • <strong>At Death:</strong> Heirs receive the liquidity fund (shown in the Legacy column)
+                    • <strong>Liquidity grows at ${fmtPct(afterTaxBondRate)}/year</strong> — the 30% liquidity fund is invested in bonds at ${fmtPct(bondRate)} and taxed annually at ${fmtPct(rateTaxRate)}, so ${fmtPct(bondRate)} × (1 − ${fmtPct(rateTaxRate)}) = ${fmtPct(afterTaxBondRate)} net<br>
+                    • <strong>At Death:</strong> Heirs receive the liquidity fund, which is why the Legacy column equals the Liquidity column (there is no insurance death benefit in Plan 1)
                 </div>
                 <div class="note-item plan2-note">
                     <strong>Plan 2 Growth Assumptions (MassMutual rates non-guaranteed):</strong><br>
@@ -1091,7 +1118,7 @@ function displayComparisonTable(comparisons) {
                     • Income: 100% of the Net EPIG that remains outside the policy is annuitized at the perpetual rate — a life annuity that pays for life and <strong>never lapses</strong><br>
                     • The cash value is never annuitized or borrowed against for income — it stays inside the policy as tax-free liquidity and the death benefit<br>
                     • Cash value grows tax-deferred at ~5.5%/yr once premiums end, easing to ~5.2% then ~4.6% in later decades (non-guaranteed)<br>
-                    • Death benefit grows: 3.00% (years 10-20), 2.76% (20-30), 2.93% (30-40)<br>
+                    • Death benefit = cash value + net amount at risk (the pure insurance layer). It always exceeds the cash value, and the gap narrows as the policy runs toward endowment at age 100 — which is why Legacy is higher than Liquidity, converging in the final rows<br>
                     • <strong>While Alive:</strong> Liquidity = policy cash value<br>
                     • <strong>At Death:</strong> Heirs receive the death benefit (Death Benefit = Cash Value + Net Amount at Risk, not additive). The annuitized Net EPIG is consumed by the life annuity
                 </div>
