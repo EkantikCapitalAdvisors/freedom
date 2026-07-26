@@ -98,7 +98,7 @@ function setupInputListeners() {
     const recalcIds = [
         'currentAge', 'timeHorizon', 'annualContribution', 'contributionTiming',
         'directCAGR', 'perpetualRate', 'taxRate', 'customTaxRate',
-        'cvGrowthRate', 'borrowPercent', 'loanRate', 'deathBenefit'
+        'cvGrowthRate', 'borrowPercent', 'epigExposurePercent', 'loanRate', 'deathBenefit'
     ];
     let recalcTimer = null;
     const liveRecalc = () => {
@@ -234,6 +234,10 @@ function gatherInputs() {
         // Plan 2
         cvGrowthRate: parseFloat(safeGetValue('cvGrowthRate', '4')) || 4,
         borrowPercent: parseFloat(safeGetValue('borrowPercent', '90')) || 90,
+        // EPIG market exposure as a % of premium. Defaults to 100% — the
+        // strategy's margin allowance lets the borrowed amount carry full
+        // exposure. Anything above borrowPercent is margin/leverage.
+        epigExposurePercent: parseFloat(safeGetValue('epigExposurePercent', '100')) || 100,
         loanRate: parseFloat(safeGetValue('loanRate', '6')) || 6,
         deathBenefit: parseFloat(safeGetValue('deathBenefit', '1500000')) || 1500000
     };
@@ -411,10 +415,26 @@ function calculatePlan1(inputs) {
 // ===================================
 
 function calculatePlan2(inputs) {
-    const { 
-        timeHorizon, annualContribution, cvGrowthRate, borrowPercent, 
-        loanRate, directCAGR, deathBenefit, contributionTiming, perpetualRate 
+    const {
+        timeHorizon, annualContribution, cvGrowthRate, borrowPercent,
+        loanRate, directCAGR, deathBenefit, contributionTiming, perpetualRate
     } = inputs;
+    // EPIG market exposure can exceed the borrowed amount (the strategy's
+    // margin allowance). Defaults to the borrow % when absent, so older markup
+    // and saved URLs keep the previous unlevered behaviour.
+    const epigExposurePercent = (inputs.epigExposurePercent === undefined || inputs.epigExposurePercent === null)
+        ? borrowPercent
+        : inputs.epigExposurePercent;
+
+    // LEVERAGE MODEL: only the borrowed cash is real equity in the EPIG
+    // account; the exposure above it is carried on margin (futures/portfolio
+    // margin — EPIG trades SPY and S&P 500 futures). Margin amplifies the
+    // return ON EQUITY rather than creating a debt to repay, so the account
+    // compounds at CAGR x leverage. Modelling it the other way (contributing
+    // the full exposure at the unlevered CAGR) would conjure the margin
+    // portion out of nothing and overstate the result.
+    const epigLeverage = borrowPercent > 0 ? (epigExposurePercent / borrowPercent) : 1;
+    const epigGrowthRate = directCAGR * epigLeverage;
     
     let cashValue = 0;
     let epigValue = 0;
@@ -435,7 +455,8 @@ function calculatePlan2(inputs) {
             cashValue += premium;
         }
         
-        // Borrow amount (as % of premium), invested in EPIG
+        // Amount borrowed from the policy — this is the cash that funds both
+        // the policy loan and the equity in the EPIG account.
         const borrowAmount = premium * (borrowPercent / 100);
 
         // Policy loan capitalizes interest, paid back at the end from EPIG.
@@ -448,14 +469,13 @@ function calculatePlan2(inputs) {
         cumulativeInterest += interestPayment;
         loanBalance = loanBalance * (1 + netLoanRate) + borrowAmount;
 
-        // EPIG investment growth — compounds on the FULL borrowed amount at the
-        // EPIG CAGR (interest is not skimmed off; it is settled at the end when
-        // the loan is repaid from EPIG).
+        // EPIG account equity compounds at the leveraged rate (interest is not
+        // skimmed off; the policy loan is settled at the end from EPIG).
         if (contributionTiming === 'start') {
             epigValue += borrowAmount;
-            epigValue *= (1 + directCAGR / 100);
+            epigValue *= (1 + epigGrowthRate / 100);
         } else {
-            epigValue *= (1 + directCAGR / 100);
+            epigValue *= (1 + epigGrowthRate / 100);
             epigValue += borrowAmount;
         }
 
@@ -1067,6 +1087,7 @@ function displayComparisonTable(comparisons) {
                     <strong>Plan 2 Growth Assumptions (MassMutual rates non-guaranteed):</strong><br>
                     • Accumulation: premiums build tax-free cash value; loans are taken against it and invested in EPIG. EPIG compounds; the loan (principal + interest) is repaid from the EPIG proceeds<br>
                     • Wash loan: the borrowed cash value keeps earning the credited rate, so the loan's net cost is (loan rate − cash-value rate). Loan interest is treated as deductible against the EPIG gain<br>
+                    • Leverage: EPIG exposure above the borrowed amount is carried on margin, so the account compounds at (growth rate × exposure ÷ borrow %). Leverage amplifies losses as well as gains — set EPIG Exposure % equal to Borrow % for an unlevered view<br>
                     • Income: 100% of the Net EPIG that remains outside the policy is annuitized at the perpetual rate — a life annuity that pays for life and <strong>never lapses</strong><br>
                     • The cash value is never annuitized or borrowed against for income — it stays inside the policy as tax-free liquidity and the death benefit<br>
                     • Cash value grows tax-deferred at ~5.5%/yr once premiums end, easing to ~5.2% then ~4.6% in later decades (non-guaranteed)<br>
