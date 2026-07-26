@@ -241,25 +241,35 @@ function gatherInputs() {
         return Number.isFinite(parsed) && parsed >= 1 ? parsed : fallback;
     };
 
+    // Clamp to the ranges the inputs advertise. The HTML min/max attributes are
+    // not enforced for typed values or for loadFromURLParameters(), which
+    // writes shared-link values straight into the fields. Without ceilings a
+    // huge timeHorizon overflowed the portfolio to Infinity and rendered $NaN
+    // across the whole scorecard; without floors, negative rates printed
+    // negative dollars.
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
     return {
-        currentAge: positiveInt('currentAge', 51),
-        timeHorizon: positiveInt('timeHorizon', 12),
+        // 80 is the realistic upper issue age for this product; beyond it the
+        // projection would run past the age-100 endowment and print ages like 190.
+        currentAge: clamp(positiveInt('currentAge', 51), 18, 80),
+        timeHorizon: clamp(positiveInt('timeHorizon', 12), 1, 50),
         annualContribution: Math.max(0, num('annualContribution', 50000)),
         contributionTiming: contributionTiming,
 
         // Plan 1
-        directCAGR: num('directCAGR', 17),
+        directCAGR: Math.max(0, num('directCAGR', 17)),
         taxRate: taxRate,
-        perpetualRate: num('perpetualRate', 7),
+        perpetualRate: clamp(num('perpetualRate', 7), 0, 20),
 
         // Plan 2
-        cvGrowthRate: num('cvGrowthRate', 4),
-        borrowPercent: num('borrowPercent', 90),
+        cvGrowthRate: Math.max(0, num('cvGrowthRate', 4)),
+        borrowPercent: clamp(num('borrowPercent', 90), 0, 100),
         // EPIG market exposure as a % of premium. Defaults to 100% — the
         // strategy's margin allowance lets the borrowed amount carry full
         // exposure. Anything above borrowPercent is margin/leverage.
-        epigExposurePercent: num('epigExposurePercent', 100),
-        loanRate: num('loanRate', 6),
+        epigExposurePercent: clamp(num('epigExposurePercent', 100), 0, 200),
+        loanRate: clamp(num('loanRate', 6), 0, 20),
         deathBenefit: Math.max(0, num('deathBenefit', 1500000))
     };
 }
@@ -849,6 +859,11 @@ function generateOptionalityVisual(plan1, plan2) {
     const p2CV = plan2.effectiveCashValue || 0;         // inside the policy
     const p2Total = p2NetEPIG + p2CV;
     const p2DB = plan2.netDeathBenefit || 0;
+    // The death benefit CONTAINS the cash value, so showing "+ death benefit"
+    // next to the accessible total double-counts the cash value (the very
+    // "not additive" error the comparison table warns about). Only the net
+    // amount at risk — the pure insurance layer — is genuinely additional.
+    const p2NAR = Math.max(0, p2DB - p2CV);
 
     const maxTotal = Math.max(p1Total, p2Total, 1);
     const pct = (v) => (v / maxTotal) * 100;
@@ -877,7 +892,7 @@ function generateOptionalityVisual(plan1, plan2) {
             <div class="opt-plan">
                 <div class="opt-plan__head">
                     <span class="opt-plan__name">Plan 2: Whole Life + EPIG</span>
-                    <span class="opt-plan__total">${fmt(p2Total)} accessible${p2DB > 0 ? ` &nbsp;·&nbsp; + ${fmt(p2DB)} death benefit` : ''}</span>
+                    <span class="opt-plan__total">${fmt(p2Total)} accessible${p2NAR > 0 ? ` &nbsp;·&nbsp; + ${fmt(p2NAR)} extra at death` : ''}</span>
                 </div>
                 <div class="opt-bar" style="width:${pct(p2Total)}%">
                     ${seg('seg-annuitize', p2NetEPIG, p2Total, 'Net EPIG outside (annuitized)')}
@@ -891,7 +906,7 @@ function generateOptionalityVisual(plan1, plan2) {
                 <span><span class="opt-dot" style="background:#6a8fc0"></span> Inside the policy (tax-free cash value)</span>
             </div>
 
-            <p class="opt-note"><strong>The optionality:</strong> the gold portion is what produces the perpetual income if you annuitize — but you're never forced to. Plan 1 can be kept entirely liquid (${fmt(p1Total)}). Plan 2 keeps ${fmt(p2CV)} of tax-free cash value inside the policy plus ${fmt(p2NetEPIG)} outside${p2DB > 0 ? `, and still carries a ${fmt(p2DB)} death benefit to heirs` : ''}. Annuitizing is a one-way choice; a lump sum keeps flexibility. Figures are at the end of the funding period.</p>
+            <p class="opt-note"><strong>The optionality:</strong> the gold portion is what produces the perpetual income if you annuitize — but you're never forced to. Plan 1 can be kept entirely liquid (${fmt(p1Total)}). Plan 2 keeps ${fmt(p2CV)} of tax-free cash value inside the policy plus ${fmt(p2NetEPIG)} outside${p2NAR > 0 ? `, and at death pays a ${fmt(p2DB)} death benefit — that figure already includes the cash value, so only ${fmt(p2NAR)} of it is additional` : ''}. Annuitizing is a one-way choice; a lump sum keeps flexibility. Figures are at the end of the funding period.</p>
         </div>
     `;
 
@@ -938,6 +953,10 @@ function displayResults(plan1, plan2) {
     // Show the actual after-tax rate the Plan 1 liquidity fund compounds at
     document.querySelectorAll('.plan1-liquidity-rate').forEach(el => {
         el.textContent = Math.round(afterTaxBond * 100) / 100;
+    });
+    // The annuity rate is a live input — the label must not stay hardcoded at 7%
+    document.querySelectorAll('.perpetual-rate-label').forEach(el => {
+        el.textContent = inp.perpetualRate;
     });
 
     // Plan 1 Results
@@ -1054,8 +1073,14 @@ function generateComparisonTable(plan1, plan2, inputs) {
     const contributionEndAge = currentAge + timeHorizon;
 
     // Project to years 0, 10, 20, 30, 40 from END of contribution period
-    // Year 0 = end of contribution period, Year 10 = 10 years after contributions end
-    const projectionYears = [0, 10, 20, 30, 40];
+    // Year 0 = end of contribution period, Year 10 = 10 years after contributions end.
+    // Rows past the age-100 endowment are dropped: the policy has matured and
+    // paid out by then, so projecting a cash value at "Age 190" is meaningless.
+    // The first row is always kept so the table is never empty.
+    const allProjectionYears = [0, 10, 20, 30, 40];
+    const projectionYears = allProjectionYears.filter(
+        (years, index) => index === 0 || (currentAge + timeHorizon + years) <= ENDOWMENT_AGE
+    );
     const comparisons = [];
     
     projectionYears.forEach(years => {
