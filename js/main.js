@@ -19,6 +19,7 @@ const initAnimations = () => {
             scrollTrigger: {
                 trigger: elem,
                 start: 'top 85%',
+                once: true
             }
         });
     });
@@ -33,6 +34,7 @@ const initAnimations = () => {
             scrollTrigger: {
                 trigger: elem,
                 start: 'top 85%',
+                once: true
             }
         });
     });
@@ -301,8 +303,13 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // ===================================
 
 const revealSections = () => {
-    const sections = document.querySelectorAll('.freedom-item, .ecfs-pillar, .mechanic-card, .membership-card, .path-step');
-    
+    // Skip anything already handled by initAnimations() via [data-aos].
+    // Animating the same element twice creates two competing gsap.from tweens,
+    // each holding opacity:0 — which left the membership cards invisible.
+    const sections = document.querySelectorAll(
+        '.freedom-item:not([data-aos]), .ecfs-pillar:not([data-aos]), .mechanic-card:not([data-aos]), .membership-card:not([data-aos]), .path-step:not([data-aos])'
+    );
+
     sections.forEach((section, index) => {
         gsap.from(section, {
             y: 80,
@@ -313,9 +320,65 @@ const revealSections = () => {
             scrollTrigger: {
                 trigger: section,
                 start: 'top 80%',
+                once: true
             }
         });
     });
+};
+
+// ===================================
+// ANIMATION FAILSAFE
+// ===================================
+// Entrance animations start content at opacity:0 and reveal it when a
+// ScrollTrigger fires. If a trigger never fires, the content stays invisible
+// forever. That happens in practice on this page: the calculator adds
+// thousands of pixels when it renders results, so every trigger position below
+// it goes stale. Content must never depend on an animation to be readable.
+
+const revealStuckElements = () => {
+    if (typeof gsap === 'undefined') return;
+    const animated = document.querySelectorAll(
+        '[data-aos], .freedom-item, .ecfs-pillar, .mechanic-card, .membership-card, .path-step'
+    );
+    animated.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        // Only touch things the visitor can already reach (in or above the fold)
+        const reachable = rect.top < window.innerHeight * 1.15;
+        if (reachable && parseFloat(getComputedStyle(el).opacity) < 0.01) {
+            gsap.killTweensOf(el);
+            gsap.set(el, { opacity: 1, y: 0 });
+        }
+    });
+};
+
+const initAnimationFailsafe = () => {
+    let ticking = false;
+    const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => { revealStuckElements(); ticking = false; });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+
+    // Recalculate trigger positions whenever the page height changes materially
+    // (e.g. the calculator rendering its results), then sweep for stuck nodes.
+    if (typeof ResizeObserver !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        let lastHeight = document.body.scrollHeight;
+        const observer = new ResizeObserver(() => {
+            const height = document.body.scrollHeight;
+            if (Math.abs(height - lastHeight) > 200) {
+                lastHeight = height;
+                ScrollTrigger.refresh();
+                revealStuckElements();
+            }
+        });
+        observer.observe(document.body);
+    }
+
+    // Initial sweeps, covering late layout shifts from fonts/images.
+    revealStuckElements();
+    [400, 1200, 2500].forEach(ms => setTimeout(revealStuckElements, ms));
 };
 
 // ===================================
@@ -356,6 +419,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initAnimations();
     revealSections();
     initParallax();
+    initAnimationFailsafe();
     
     console.log('%cEkantik Capital Advisors', 'font-size: 24px; font-weight: bold; color: #E0A930; font-family: serif;');
     console.log('%cPremium Landing Page Loaded - Native Cursor Enabled', 'font-size: 14px; color: #9CA3AF;');
