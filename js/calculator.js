@@ -199,14 +199,19 @@ function gatherInputs() {
         return element.checked;
     };
     
-    // Get tax rate safely
+    // Get tax rate safely. Same falsy-zero trap as the numeric fields below:
+    // a custom rate of 0% must not silently become 25%.
     const taxRateSelect = document.getElementById('taxRate');
     let taxRate = 25; // default
     if (taxRateSelect) {
-        taxRate = parseFloat(taxRateSelect.value);
+        const selected = parseFloat(taxRateSelect.value);
+        if (Number.isFinite(selected)) taxRate = selected;
         if (taxRateSelect.value === 'custom') {
-            taxRate = parseFloat(safeGetValue('customTaxRate', '25')) || 25;
+            const custom = parseFloat(safeGetValue('customTaxRate', '25'));
+            taxRate = Number.isFinite(custom) ? custom : 25;
         }
+        // Guard against out-of-range entries producing nonsense.
+        taxRate = Math.min(100, Math.max(0, taxRate));
     } else {
         console.warn('taxRate element not found, using default: 25');
     }
@@ -220,26 +225,42 @@ function gatherInputs() {
         console.warn('contributionTiming element not found, using default: end');
     }
     
+    // Parse a numeric field, falling back ONLY when the value is missing or
+    // unparseable. The previous `parseFloat(x) || fallback` pattern was a real
+    // bug: 0 is falsy in JavaScript, so entering 0 for growth, borrow %,
+    // exposure %, loan rate or contribution silently reverted to the default
+    // and the calculator returned baseline numbers as if the input never
+    // happened. 0 is a legitimate value for every one of those fields.
+    const num = (id, fallback) => {
+        const parsed = parseFloat(safeGetValue(id, String(fallback)));
+        return Number.isFinite(parsed) ? parsed : fallback;
+    };
+    // Fields that must stay >= 1 to keep the projection meaningful.
+    const positiveInt = (id, fallback) => {
+        const parsed = parseInt(safeGetValue(id, String(fallback)), 10);
+        return Number.isFinite(parsed) && parsed >= 1 ? parsed : fallback;
+    };
+
     return {
-        currentAge: parseInt(safeGetValue('currentAge', '51')) || 51,
-        timeHorizon: parseInt(safeGetValue('timeHorizon', '12')) || 12,
-        annualContribution: parseFloat(safeGetValue('annualContribution', '50000')) || 50000,
+        currentAge: positiveInt('currentAge', 51),
+        timeHorizon: positiveInt('timeHorizon', 12),
+        annualContribution: Math.max(0, num('annualContribution', 50000)),
         contributionTiming: contributionTiming,
-        
+
         // Plan 1
-        directCAGR: parseFloat(safeGetValue('directCAGR', '17')) || 17,
+        directCAGR: num('directCAGR', 17),
         taxRate: taxRate,
-        perpetualRate: parseFloat(safeGetValue('perpetualRate', '7')) || 7,
-        
+        perpetualRate: num('perpetualRate', 7),
+
         // Plan 2
-        cvGrowthRate: parseFloat(safeGetValue('cvGrowthRate', '4')) || 4,
-        borrowPercent: parseFloat(safeGetValue('borrowPercent', '90')) || 90,
+        cvGrowthRate: num('cvGrowthRate', 4),
+        borrowPercent: num('borrowPercent', 90),
         // EPIG market exposure as a % of premium. Defaults to 100% — the
         // strategy's margin allowance lets the borrowed amount carry full
         // exposure. Anything above borrowPercent is margin/leverage.
-        epigExposurePercent: parseFloat(safeGetValue('epigExposurePercent', '100')) || 100,
-        loanRate: parseFloat(safeGetValue('loanRate', '6')) || 6,
-        deathBenefit: parseFloat(safeGetValue('deathBenefit', '1500000')) || 1500000
+        epigExposurePercent: num('epigExposurePercent', 100),
+        loanRate: num('loanRate', 6),
+        deathBenefit: Math.max(0, num('deathBenefit', 1500000))
     };
 }
 
